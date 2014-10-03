@@ -427,7 +427,7 @@ function ipal_display_instructor_interface($cmid) {
         echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
         echo "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
         echo "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
-        echo "location=0,scrollbars,resizable,toolbar,status,directories=0,fullscreen=0,dependent');"
+        echo "location=0,scrollbars,resizable,toolbar,status,directories=0,fullscreen=0,dependent');";
         echo "\n\t if (window.focus) {newwindow.focus()}
         \n\t return false;
     \n }
