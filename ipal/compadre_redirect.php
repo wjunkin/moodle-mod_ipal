@@ -28,7 +28,6 @@ require_once("locallib.php");
 require_once($CFG->dirroot . '/mod/ipal/question/engine/lib.php');// Needed for Class 'question_display_options'.
 require_once($CFG->dirroot . '/mod/ipal/question/engine/bank.php');
 require_once($CFG->dirroot . '/mod/ipal/editlib.php');
-//require_once("ipal_edit_quizlocallib.php");
 require_once($CFG->dirroot . '/mod/ipal/quiz/ipal_xmlparser.php');
 $cmid = required_param('cmid', PARAM_INT);
 $cm = $DB->get_record('course_modules', array('id' => $cmid));

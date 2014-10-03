@@ -24,10 +24,9 @@
  */
 
 require_once('../../config.php');
-require_once("locallib.php");
+require_once($CFG->dirroot . '/mod/ipal/locallib.php');
 require_once($CFG->dirroot . '/mod/ipal/question/engine/lib.php');// This is needed for Class 'question_display_options'.
 require_once($CFG->dirroot . '/mod/ipal/question/engine/bank.php');
-//require_once("ipal_edit_quizlocallib.php");
 require_once($CFG->dirroot . '/mod/ipal/editlib.php');
 require_once($CFG->dirroot . '/mod/ipal/quiz/ipal_xmlparser.php');
 $cmid = required_param('cmid', PARAM_INT);
@@ -93,7 +92,6 @@ if ($node) {
 echo $OUTPUT->header();
 
 echo '<div class="quizcontents" id="quizcontentsblock">';// Modified for ipal.
-$debug = 0;
 $repaginatingdisabledhtml = '';
 $repaginatingdisabled = false;
 $courseid = $course->id;

@@ -60,5 +60,3 @@ $externalsize->width = 570;
 $externalsize->height = 380;
 echo $OUTPUT->heading(draw_ejsapp_instance($ejsapp->id, null, $externalsize->width, $externalsize->height));
 echo "\n</div></body></html>";
-// Finish the page.
-// Echo $OUTPUT->footer().

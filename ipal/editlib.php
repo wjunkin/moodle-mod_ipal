@@ -29,7 +29,7 @@
  */
 require_once("$CFG->libdir/formslib.php");
 require_once($CFG->dirroot . '/mod/ipal/locallib.php');
-require_once($CFG->dirroot . '/mod/quiz/editlib.php');// Needed for the class ipal_question_bank_view
+require_once($CFG->dirroot . '/mod/quiz/editlib.php');// Needed for the class ipal_question_bank_view.
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -193,7 +193,14 @@ function ipal_remove_question($quiz, $questionid) {
     $DB->set_field('ipal', 'questions', $quiz->questions, array('id' => $quiz->id));
 }
 
-// Private function used by the following two.
+/**
+ * Private function used by the next two functions.
+ * Needed because Moodle 2.7 no longer has a question list.
+ * @param string $layout the existinng layout, $quiz->questions.
+ * @param int $questionid the id of a question.
+ * @param int $shift how far to shift the question (up or down).
+ * @return the updated layout
+ */
 function _ipal_move_question($layout, $questionid, $shift) {
     if (!$questionid || !($shift == 1 || $shift == -1)) {
         return $layout;
@@ -238,7 +245,7 @@ function ipal_move_question_up($layout, $questionid) {
  * @return the updated layout
  */
 function ipal_move_question_down($layout, $questionid) {
-    return _ipal_move_question($layout, $questionid, +1);
+    return _ipal_move_question($layout, $questionid, + 1);
 }
 
 /**
@@ -255,17 +262,12 @@ class ipal_question_bank_view extends quiz_question_bank_view {
     protected $quiz = false;
 
     /**
-     * Constructor
-     * @param question_edit_contexts $contexts
-     * @param moodle_url $pageurl
-     * @param object $course course settings
-     * @param object $cm activity settings.
-     * @param object $quiz quiz settings.
+     * Function to provide the correct URL for use in IPAL.
+     * This provides the cahnge needed to use the class quiz_question_bank_view in IPAL.
+     * 
+     * @param int $questionid The id of the question.
+     * @return object the correct url for IPAL.
      */
-    public function __construct($contexts, $pageurl, $course, $cm, $quiz) {
-        parent::__construct($contexts, $pageurl, $course, $cm,$quiz);
-    }
-
     public function add_to_quiz_url($questionid) {
         global $CFG;
         $params = $this->baseurl->params();
@@ -318,8 +320,7 @@ function module_specific_controls($totalnumber, $recurse, $category, $cmid, $cmo
         } else {
             $disabled = '';
         }
-        $randomusablequestions =
-                question_bank::get_qtype('random')->get_available_questions_from_category(
+        $randomusablequestions = question_bank::get_qtype('random')->get_available_questions_from_category(
                         $category->id, $recurse);
         $maxrand = count($randomusablequestions);$maxrand = 0;// Adding random questions is not an IPAL option.
         if ($maxrand > 0) {
@@ -477,8 +478,8 @@ function ipal_print_question_list($quiz, $pageurl, $allowdelete, $reordertool,
     $reordercontrols2top = '<div class="moveselectedonpage">' .
         get_string('moveselectedonpage', 'quiz', $a) .
         '<input type="submit" name="savechanges" value="' .
-        $strmove . '"  ' . $pagingdisabled . ' />' . '
-        <br /><input type="submit" name="savechanges" value="' .
+        $strmove . '"  ' . $pagingdisabled . ' />' .
+        '<br /><input type="submit" name="savechanges" value="' .
         $strreorderquestions . '" /></div>';
     $reordercontrols2bottom = '<div class="moveselectedonpage">' .
         '<input type="submit" name="savechanges" value="' .

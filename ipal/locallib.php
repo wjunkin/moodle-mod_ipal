@@ -207,10 +207,11 @@ function ipal_count_questions($questionid) {
 
     return( "?data=".implode(",", $data)."&labels=".implode(",", $labels)."&total=10");
 }
+
 /**
  * This function creates the HTML tag for the preview icon.
  */
-function ipal_create_preview_icon ( ) {
+function ipal_create_preview_icon() {
     global $CFG;
     global $PAGE;
     $previewimageurl = $CFG->wwwroot.'/theme/image.php/'.$PAGE->theme->name.'/core/'.$CFG->themerev.'/t/preview';
@@ -229,7 +230,9 @@ function ipal_make_instructor_form() {
     $myform = "<form action=\"?".$_SERVER['QUERY_STRING']."\" method=\"post\">\n";
     $myform .= "\n";
     foreach (ipal_get_questions() as $items) {
-        $previewurl = $CFG->wwwroot.'/question/preview.php?id='.$items['id'].'&cmid='.$cm->id.'&behaviour=deferredfeedback&correctness=0&marks=1&markdp=-2&feedback&generalfeedback&rightanswer&history';
+        $previewurl = $CFG->wwwroot.'/question/preview.php?id='.
+            $items['id'].'&cmid='.$cm->id.
+            '&behaviour=deferredfeedback&correctness=0&marks=1&markdp=-2&feedback&generalfeedback&rightanswer&history';
         $myform .= "\n<input type=\"radio\" name=\"question\" value=\"".$items['id']."\" />";
         $myform .= "\n<a href=\"$previewurl\" onclick=\"return ipalpopup('".$items['id']."')\" target=\"_blank\">";
         $myform .= ipal_create_preview_icon()."</a>";
@@ -421,13 +424,14 @@ function ipal_display_instructor_interface($cmid) {
     \n function ipalpopup(id) {
         \n\t url = 'http://localhost/moodle27_1/question/preview.php?id='+id+'&amp;cmid=";
         echo $cm->id;
-        echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';
-        \n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,location=0,scrollbars,resizable,toolbar,status,directories=0,fullscreen=0,dependent');
-        \n\t if (window.focus) {newwindow.focus()}
+        echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
+        echo "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
+        echo "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
+        echo "location=0,scrollbars,resizable,toolbar,status,directories=0,fullscreen=0,dependent');"
+        echo "\n\t if (window.focus) {newwindow.focus()}
         \n\t return false;
     \n }
-    \n </script>\n"
-    ;
+    \n </script>\n";
 
     echo  ipal_make_instructor_form();
     echo "<br><br>";

@@ -21,7 +21,6 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-//echo '<html><head><title>Adding EJS Activities to IPAL questions</title></head><body>';
 
 require_once('../../config.php');
 $cmid = optional_param('cmid', 0, PARAM_INT); // Course_module ID.
@@ -80,6 +79,6 @@ foreach ($qid as $qkey => $qvalue) {
     $newquestiontext = $DB->get_field('question', 'questiontext', array('id' => $qvalue));
     echo "\n<br />".$newquestiontext;
 }
-//echo "\n</body></html>";
+
 // Finish the page.
 echo $OUTPUT->footer();

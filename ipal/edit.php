@@ -132,9 +132,7 @@ if (($up = optional_param('up', false, PARAM_INT)) && confirm_sesskey()) {
 }
 
 if (($down = optional_param('down', false, PARAM_INT)) && confirm_sesskey()) {
-    //echo "\n<br />debug501 in edit and quiz-questions is ".$quiz->questions." and down is ".$down;
     $quiz->questions = ipal_move_question_down($quiz->questions, $down);
-    //echo "\n<br />debug503 in edit and quiz-questions is ".$quiz->questions;exit;
     $DB->set_field('ipal', 'questions', $quiz->questions, array('id' => $quiz->id));// Changed for IPAL.
     quiz_delete_previews($quiz);
     redirect($afteractionurl);

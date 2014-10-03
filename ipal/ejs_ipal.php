@@ -21,15 +21,7 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-/*
-?>
- <html>
-<head>
-<title>Adding EJS Activities to IPAL questions</title>
-</head>
-<body>
-<?php
-*/
+
 require_once('../../config.php');
 $cmid = optional_param('cmid', 0, PARAM_INT); // Course_module ID.
 if ($cmid) {
@@ -119,7 +111,6 @@ if (count($hasejs) > 1) {
         echo "\n<br />".$qhasejtitle;
     }
 }
-//echo "</body>\n</html>";
+
 // Finish the page.
 echo $OUTPUT->footer();
-
