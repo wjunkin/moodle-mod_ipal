@@ -67,8 +67,11 @@ $thisipal[0] = '';
 $otherquestions[0] = '';
 foreach ($qcategories as $categoryid => $value) {
     $questions = $DB->get_records('question', array('category' => $categoryid));
+    $ejsapp = 'ejsapp';
     foreach ($questions as $qid => $question) {
         if (preg_match("/viewejs/", $question->questiontext)) {
+            $hasejs[$qid] = $question->name;
+        } else if (preg_match("/$ejsapp\/jarfiles/", $question->questiontext)) {
             $hasejs[$qid] = $question->name;
         } else if (in_array($qid, $ipalquestions)) {
             $thisipal[$qid] = $question->name;

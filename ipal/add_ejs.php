@@ -65,17 +65,15 @@ if (isset($ejsappid) and $ejsappid > 0) {
     echo "\n<br /> Please use the back button and try again.</body></html>";
     exit;
 }
-$ejs = $DB->get_record('modules', array('name' => 'ejsapp'));
-$ejsid = $ejs->id;// The id for all EJS module activities.
-$ejscoursemodule = $DB->get_record('course_modules', array('instance' => $ejsappid, 'course' => $courseid, 'module' => $ejsid));
-$ejscoursemoduleid = $ejscoursemodule->id;
-$newcode = "src=\"".$CFG->wwwroot."/mod/ipal/viewejs.php?id=$ejscoursemoduleid\" width='600' height='410'>EJS App";
-$newcode = '<iframe '.$newcode.'</iframe>';
+
+require_once('../../mod/ejsapp/external_interface/ejsapp_external_interface.php');
+$ejscode = draw_ejsapp_instance($ejsappid);
+$ejscode = 'EJS<ejsipal>'.$ejscode."</ejsipal>\n<br />";
 echo "\n<be /> Here are the revised question(s):";
 foreach ($qid as $qkey => $qvalue) {
     echo "\n<br /> question $qvalue";
     $questiontext = $DB->get_field('question', 'questiontext', array('id' => $qvalue));
-    $result = $DB->set_field('question', 'questiontext', $newcode.$questiontext, array('id' => $qvalue));
+    $result = $DB->set_field('question', 'questiontext', $ejscode.$questiontext, array('id' => $qvalue));
     $newquestiontext = $DB->get_field('question', 'questiontext', array('id' => $qvalue));
     echo "\n<br />".$newquestiontext;
 }

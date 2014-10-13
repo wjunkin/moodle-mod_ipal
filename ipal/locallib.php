@@ -185,6 +185,8 @@ function ipal_get_questions() {
 
         $aquestions = $DB->get_record('question', array('id' => $q));
         if (isset($aquestions->questiontext)) {
+            // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+            $aquestions->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $aquestions->questiontext);
             $pagearray2[] = array('id' => $q, 'question' => strip_tags($aquestions->questiontext),
                 'answers' => ipal_get_answers($q));
         }
@@ -441,9 +443,9 @@ function ipal_display_instructor_interface($cmid) {
             echo "<br>";
             echo "<br>";
             echo "<iframe id= \"graphIframe\" src=\"graphics.php?ipalid=".$ipal->id."\" height=\"535\" width=\"723\"></iframe>";
-            echo "<br><br><a onclick=\"window.open('popupgraph.php?ipalid=".$ipal->id."', '',
-                    'width=620,height=450,toolbar=no,location=no,menubar=no,copyhistory=no,status=no,
-                    directories=no,scrollbars=yes,resizable=yes');
+            echo "<br><br><a onclick=\"newwindow=window.open('popupgraph.php?ipalid=".$ipal->id."', '',
+                    'width=620,height=450,toolbar=no,location=no,menubar=no,copyhistory=no,status=no,";
+            echo "directories=no,scrollbars=yes,resizable=yes');
                     return false;\"
                     href=\"popupgraph.php?ipalid=".$ipal->id."\" target=\"_blank\">Open a new window for the graph.</a>";
         }
@@ -469,6 +471,8 @@ function ipal_show_current_question() {
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
         $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipal->id));
         $questiontext = $DB->get_record('question', array('id' => $question->question_id));
+        // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+        $questiontext->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $questiontext->questiontext);
         echo "The current question is -> ".strip_tags($questiontext->questiontext);
         return(1);
     } else {

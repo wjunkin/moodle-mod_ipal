@@ -331,6 +331,11 @@ $numberoflisteners = 1;// Each quiz in IPAL is only on one page.
 for ($pageiter = 1; $pageiter <= $numberoflisteners; $pageiter++) {
     $quizeditconfig->dialoglisteners[] = 'addrandomdialoglaunch_' . $pageiter;
 }
+// Javascript needed so that the quiz formatting tools will work correctly.
+echo "\n".'<script type="text/javascript">';
+echo "\n"."document.getElementById('page-mod-ipal-edit').id = 'page-mod-quiz-edit';";
+echo "\n</script>";
+
 $PAGE->requires->data_for_js('quiz_edit_config', $quizeditconfig);
 $PAGE->requires->js('/question/qengine.js');
 $module = array(
@@ -357,7 +362,8 @@ echo '<div class="questionbankwindow ' . $bankclass . 'block">';
 echo '<div class="header"><div class="title"><h2>';
 // Offer the opportunity to add an EJS simulation to a question.
 if ($DB->count_records('modules', array('name' => 'ejsapp'))) {
-    echo "\n<br />Click <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid'>to add EJS Apps</a>";
+    echo "\n<br />Click <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid' style='color: rgb(255,255,255)'>
+        to add EJS Apps</a>";
 }
 require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
 // Create a generic multichoice question and a generic essay question if they don't exist in this course.
