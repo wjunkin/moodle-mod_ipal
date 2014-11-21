@@ -52,7 +52,8 @@ if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
 
 echo "\n<br />Information: IPAL id is $ipalid.";
 $ipalquestions = explode(",", $ipal->questions);
-echo " There are ".count($ipalquestions)." ipal questions in this IPAL activity.";
+$numberofquestions = count($ipalquestions) - 1;
+echo " There are $numberofquestions ipal questions in this IPAL activity.";
 $courseid = $coursemodules->course;
 if (!$ejsapps = $DB->get_records('ejsapp', array('course' => $courseid))) {
     echo "\n<br />You must create at least one EJS App activity in this course before you can add it to questions.";
@@ -97,8 +98,8 @@ if (count($thisipal) > 1) {
     }
 }
 if (count($otherquestions) > 1) {
-    echo "\n<br /><br />Here are other questions which are not in this IPAL activity.
-        You may add the selected EJS App activity to these questions as well.";
+    echo "\n<br /><br />Here are other questions which are not in this IPAL activity.";
+    echo " You may add the selected EJS App activity to these questions as well.";
     foreach ($otherquestions as $qotherid => $qothertitle) {
         if ($qotherid) {
             echo "\n<br /><input type='checkbox' value='$qotherid' name='qid[$qcount]'>".$qothertitle;$qcount++;

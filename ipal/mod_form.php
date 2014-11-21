@@ -76,7 +76,9 @@ class mod_ipal_mod_form extends moodleform_mod {
         }
         // Add options to enable mobile (app or clicker) polling.
         $mform->addElement('select', 'mobile', get_string('ipalmobile', 'ipal'),
-            array(0 => 'No', 1 => 'Mobile App', 2 => 'Clickers', 3 => 'Both'));
+            array(0 => 'No', 1 => 'Mobile App'));
+        // Add in 2 => 'Clickers', 3 => 'Both' when clickers are enabled.
+        // Change the text in ipalmobile when clickers are enabled.
         $mform->addHelpButton('mobile', 'ipalmobile', 'ipal');
 
         // Adding the standard "intro" and "introformat" fields.

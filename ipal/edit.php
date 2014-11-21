@@ -43,7 +43,7 @@
 
 require_once('../../config.php');
 require_once($CFG->dirroot . '/mod/ipal/quiz/ipal_genericq_create.php');// Creates two generic questions for each IPAL activity.
-require_once($CFG->dirroot . '/mod/quiz/editlib.php');
+require_once($CFG->dirroot . '/question/editlib.php');
 require_once($CFG->dirroot . '/mod/quiz/addrandomform.php');
 require_once($CFG->dirroot . '/question/category_class.php');
 require_once($CFG->dirroot . '/mod/ipal/editlib.php');
@@ -77,8 +77,6 @@ if ($quizreordertool > -1) {
 $canaddrandom = $contexts->have_cap('moodle/question:useall');
 $canaddquestion = (bool) $contexts->having_add_and_use();
 
-$quizhasattempts = quiz_has_attempts($quiz->id);$quizhasattempts = 0;// Attempts don't matter in IPAL.
-
 $PAGE->set_url($thispageurl);
 
 // Get the course object and related bits.
@@ -86,9 +84,6 @@ $course = $DB->get_record('course', array('id' => $quiz->course));
 if (!$course) {
     print_error('invalidcourseid', 'error');
 }
-
-$questionbank = new ipal_question_bank_view($contexts, $thispageurl, $course, $cm, $quiz);
-$questionbank->set_quiz_has_attempts($quizhasattempts);
 
 // Log this visit.
 $params = array(
@@ -127,14 +122,12 @@ if ($scrollpos) {
 if (($up = optional_param('up', false, PARAM_INT)) && confirm_sesskey()) {
     $quiz->questions = ipal_move_question_up($quiz->questions, $up);
     $DB->set_field('ipal', 'questions', $quiz->questions, array('id' => $quiz->id));// Changed for IPAL.
-    quiz_delete_previews($quiz);
     redirect($afteractionurl);
 }
 
 if (($down = optional_param('down', false, PARAM_INT)) && confirm_sesskey()) {
     $quiz->questions = ipal_move_question_down($quiz->questions, $down);
     $DB->set_field('ipal', 'questions', $quiz->questions, array('id' => $quiz->id));// Changed for IPAL.
-    quiz_delete_previews($quiz);
     redirect($afteractionurl);
 }
 
@@ -164,8 +157,6 @@ if (optional_param('add', false, PARAM_BOOL) && confirm_sesskey()) {
             ipal_add_quiz_question($key, $quiz);
         }
     }
-    quiz_delete_previews($quiz);
-    quiz_update_sumgrades($quiz);
     redirect($afteractionurl);
 }
 
@@ -187,7 +178,6 @@ if ($remove && confirm_sesskey()) {
     // Remove a question from the quiz.
     // We require the user to have the 'use' capability on the question.
     // So that then can add it back if they remove the wrong one by mistake.
-    quiz_require_question_use($remove);
     ipal_remove_question($quiz, $remove);
     $DB->set_field('ipal', 'questions', $quiz->questions, array('id' => $quiz->id));// Added for IPAL.
     redirect($afteractionurl);
@@ -306,12 +296,8 @@ if (optional_param('savechanges', false, PARAM_BOOL) && confirm_sesskey()) {
     redirect($afteractionurl);
 }
 
-$questionbank->process_actions($thispageurl, $cm);
-
 // End of process commands =====================================================.
 
-$PAGE->requires->skip_link_to('questionbank',
-        get_string('skipto', 'access', get_string('questionbank', 'question')));
 $PAGE->requires->skip_link_to('quizcontentsblock',
         get_string('skipto', 'access', get_string('questionsinthisquiz', 'quiz')));
 $PAGE->set_title(get_string('editingquizx', 'quiz', format_string($quiz->name)));
@@ -345,8 +331,6 @@ $module = array(
     'strings'   => array(),
     'async'     => false,
 );
-$PAGE->requires->js_init_call('quiz_edit_init', null, false, $module);
-
 
 if ($quizqbanktool) {
     $bankclass = '';
@@ -355,45 +339,25 @@ if ($quizqbanktool) {
     $bankclass = 'collapsed ';
     $quizcontentsclass = 'quizwhenbankcollapsed';
 }
-
+echo "<table border='0'><tr><td>";
 // Question bank display.
 // ============.
 echo '<div class="questionbankwindow ' . $bankclass . 'block">';
-echo '<div class="header"><div class="title"><h2>';
-// Offer the opportunity to add an EJS simulation to a question.
+ipal_create_genericq($quiz->course);
+echo "<h2>Add Questions</h2>";
+$returnnewquestionurl = '%2Fmod%2Fipal%2Fedit.php%3Fcmid%3D'.$cmid.'%26addonpage%3D0&cmid=';
+$returnnewquestionurl .= $cmid.'&category=2&addonpage=0&appendqnumstring=addquestion';
+echo "\n".'<a href="'.$CFG->wwwroot.'/question/addquestion.php?returnurl='.$returnnewquestionurl.'">Add a new question</a>';
+echo "\n".'<br /><a href="'.$CFG->wwwroot.'/mod/ipal/ipal_questionbank.php?cmid='.$cmid.'">Add question from questionbank</a>';
+require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
 if ($DB->count_records('modules', array('name' => 'ejsapp'))) {
-    echo "\n<br />Click <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid' style='color: rgb(255,255,255)'>
+    echo "\nClick <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid'>
         to add EJS Apps</a>";
 }
-require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
-// Create a generic multichoice question and a generic essay question if they don't exist in this course.
-ipal_create_genericq($quiz->course);
-echo get_string('questionbankcontents', 'quiz') .
-        ' <a href="' . $thispageurl->out(true, array('qbanktool' => '1')) .
-       '" id="showbankcmd">[' . get_string('show').
-       ']</a>
-       <a href="' . $thispageurl->out(true, array('qbanktool' => '0')) .
-       '" id="hidebankcmd">[' . get_string('hide').
-       ']</a>';
-echo '</h2></div></div><div class="content">';
-
-echo '<span id="questionbank"></span>';
-echo '<div class="container">';
-echo '<div id="module" class="module">';
-echo '<div class="bd">';
-$questionbank->display('editq',
-        $pagevars['qpage'],
-        $pagevars['qperpage'],
-        $pagevars['cat'], $pagevars['recurse'], $pagevars['showhidden'],
-        $pagevars['qbshowtext']);
 echo '</div>';
-echo '</div>';
-echo '</div>';
-
-echo '</div></div>';
 // ...================.
 // End of question bank display.
-
+echo "</td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>";
 echo '<div class="quizcontents ' . $quizcontentsclass . '" id="quizcontentsblock">';
 
 
@@ -401,7 +365,7 @@ $repaginatingdisabledhtml = '';
 $repaginatingdisabled = false;
 
 echo '<a href="view.php?id='.$quiz->cmid.'">Start polling with '.$quiz->name."</a>\n<br />";
-echo $OUTPUT->heading('iPollAll Questions for ' . $quiz->name, 2);// Modified for ipal.
+echo $OUTPUT->heading('Current Questions for ' . $quiz->name, 2);// Modified for ipal.
 echo $OUTPUT->help_icon('editingipal', 'ipal', get_string('basicideasofipal', 'ipal'));
 
 $tabindex = 0;
@@ -410,13 +374,13 @@ $notifystrings = array();
 
 echo '<div class="editq">';
 
-ipal_print_question_list($quiz, $thispageurl, true, $quizreordertool, $quizqbanktool,
-        $quizhasattempts, $defaultcategoryobj, $canaddquestion, $canaddrandom);// Modified for IPAL.
-
+$ipal = $quiz;
+echo ipal_make_instructor_question_list();
 echo '</div>';
 
 // Close <div class="quizcontents">.
 echo '</div>';
+echo "</td></tr></table>";
 $canaddrandom = false;// No random questions allowed in IPAL.
 
 echo $OUTPUT->footer();

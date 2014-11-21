@@ -163,6 +163,43 @@ function ipal_get_questions_student($qid) {
     return($pagearray2);
 }
 
+
+/**
+ * Get the questions for the questionbank not yet used in the IPAL.
+ *
+ * @param int $coursecontextid The context id for the course.
+ * @param int $cmid The course module id for the IPAL instance.
+ * @param int $ipalid The IPAL id.
+ */
+function ipal_get_questionbank_questions($coursecontextid, $cmid, $ipalid) {
+
+    global $DB;
+    global $CFG;
+    $pagearray2 = array();
+    // Is there an quiz associated with an ipal?
+    // Get quiz and put it into an array.
+    $quiz = $DB->get_record('ipal', array('id' => $ipalid));
+
+    // Get the question ids.
+    $ipalquestions = explode(",", $quiz->questions);
+
+    // Get the unused questions and stuff them into an array.
+    $categories = $DB->get_records('question_categories', array('contextid' => $coursecontextid));
+    foreach ($categories as $category) {
+        $categoryid = $category->id;
+        $questions = $DB->get_records('question', array('category' => $categoryid));
+        foreach ($questions as $question) {
+            $q = $question->id;
+            if (isset($question->questiontext) and (!(in_array($q, $ipalquestions)))) {
+                // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+                $question->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $question->questiontext);
+                $pagearray2[] = array('id' => $q, 'question' => strip_tags($question->questiontext));
+            }
+        }
+    }
+    return($pagearray2);
+}
+
 /**
  * Get the questions in any context (like the instructor).
  */
@@ -222,6 +259,20 @@ function ipal_create_preview_icon() {
 }
 
 /**
+ * This function creates the HTML tag for the standard icons (preview, edit, up, down, add, delete).
+ *
+ * @param String $action The action (preview, edit, up, down, delete) to be taken.
+ */
+function ipal_create_standard_icon($action) {
+    global $CFG;
+    global $PAGE;
+    $standardimageurl = $CFG->wwwroot.'/theme/image.php/'.$PAGE->theme->name.'/core/'.$CFG->themerev.'/t/'.$action;
+    $imgtag = "<img alt='$action question' class='smallicon' title='$action question' src='$standardimageurl' />";
+    return $imgtag;
+}
+
+
+/**
  * This function create the form for the instructors (or anyone higher than a student) to view.
  */
 function ipal_make_instructor_form() {
@@ -249,6 +300,62 @@ function ipal_make_instructor_form() {
 
     return($myform);
 }
+
+/**
+ * This function create the list of questionsfor the instructors (or anyone higher than a student) to view.
+ */
+function ipal_make_instructor_question_list() {
+    global $ipal;
+    global $CFG;
+    global $USER;
+    global $cm;
+    $sesskey = $USER->sesskey;
+    $myform = "";
+    // Script to make the preview window a popout.
+    $myform .= "\n<script language=\"javascript\" type=\"text/javascript\">
+    \n function ipalpopup(id) {
+        \n\t url = '".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
+    $myform .= $cm->id;
+    $myform .= "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
+    $myform .= "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
+    $myform .= "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
+    $myform .= "location=0,scrollbars,resizable,toolbar,status,directories=0,fullscreen=0,dependent');";
+    $myform .= "\n\t if (window.focus) {newwindow.focus()}
+        \n\t return false;
+    \n }
+    \n </script>\n";
+    $nquestion = 1;
+    $allquestions = ipal_get_questions();
+    foreach ($allquestions as $items) {
+        $previewurl = $CFG->wwwroot.'/question/preview.php?id='.
+            $items['id'].'&cmid='.$cm->id.
+            '&behaviour=deferredfeedback&correctness=0&marks=1&markdp=-2&feedback&generalfeedback&rightanswer&history';
+        $myform .= "\n<a href=\"$previewurl\" onclick=\"return ipalpopup('".$items['id']."')\" target=\"_blank\">";
+        $myform .= ipal_create_standard_icon('preview')."</a>";
+        $editurl = $CFG->wwwroot.'/question/question.php?returnurl=%2Fmod%2Fipal%2Fedit.php%3Fcmid=';
+        $editurl .= $cm->id.'&cmid='.$cm->id.'&id='.$items['id'];
+        $myform .= "\n<a href=\"$editurl\">";
+        $myform .= ipal_create_standard_icon('edit')."</a>";
+        if ($nquestion < count($allquestions)) {
+            $downurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cm->id.'&down='.$items['id'].'&sesskey='.$sesskey;
+            $myform .= "\n<a href=\"$downurl\">";
+            $myform .= ipal_create_standard_icon('down')."</a>";
+        }
+        if ($nquestion > 1) {
+            $upurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cm->id.'&up='.$items['id'].'&sesskey='.$sesskey;
+            $myform .= "\n<a href=\"$upurl\">";
+            $myform .= ipal_create_standard_icon('up')."</a>";
+        }
+        $removeurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cm->id.'&remove='.$items['id'].'&sesskey='.$sesskey;
+        $myform .= "\n<a href=\"$removeurl\">";
+        $myform .= ipal_create_standard_icon('delete')."</a>";
+        $myform .= "\n".$items['question']."<br /><br />\n";
+        $nquestion ++;
+    }
+
+    return($myform);
+}
+
 
 /**
  * This function sets the question in the database so the client functions can find what quesiton is active.  And it does it fast.
@@ -380,6 +487,7 @@ function ipal_display_instructor_interface($cmid) {
     global $DB;
     global $ipal;
     global $cm;
+    global $CFG;
 
     if (isset($_POST['clearQuestion'])) {
         ipal_clear_question();
@@ -424,7 +532,7 @@ function ipal_display_instructor_interface($cmid) {
     // Script to make the preview window a popout.
     echo "\n<script language=\"javascript\" type=\"text/javascript\">
     \n function ipalpopup(id) {
-        \n\t url = 'http://localhost/moodle27_1/question/preview.php?id='+id+'&amp;cmid=";
+        \n\t url = ".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
         echo $cm->id;
         echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
         echo "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";

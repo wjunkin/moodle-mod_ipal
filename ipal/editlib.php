@@ -29,7 +29,6 @@
  */
 require_once("$CFG->libdir/formslib.php");
 require_once($CFG->dirroot . '/mod/ipal/locallib.php');
-require_once($CFG->dirroot . '/mod/quiz/editlib.php');// Needed for the class ipal_question_bank_view.
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -255,7 +254,7 @@ function ipal_move_question_down($layout, $questionid) {
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class ipal_question_bank_view extends quiz_question_bank_view {
+class ipal_question_bank_view extends mod_quiz\question\bank\custom_view {
     /** @var bool the quizhas attempts. */
     protected $quizhasattempts = false;
     /** @var object the quiz settings. */
@@ -649,3 +648,52 @@ function ipal_print_question_list($quiz, $pageurl, $allowdelete, $reordertool,
         }
     }// End of if(isset($order).
 }
+
+
+/**
+ * This function displays the list of questions in the edit page.
+ * This was needed because of changed made in Moodle 2.8 so that the core functions were difficult to use
+ * @param int $cmid The ipal id for this ipal instance.
+ */
+function ipal_display_question_list($cmid) {
+    global $DB;
+    global $ipal;
+    global $cm;
+
+    $state = $DB->get_record('ipal', array('id' => $ipal->id));
+
+    echo "<table><tr><td>".instructor_buttons()."</td><td>".ipal_show_compadre($cmid)."</td><td>".
+        ipal_toggle_view($newstate)."</td>";
+    if ($ipal->mobile) {
+        $timecreated = $ipal->timecreated;
+        $ac = $ipal->id.substr($timecreated, strlen($timecreated) - 2, 2);
+        echo "<td>access code=$ac</td>";
+    }
+    echo "</tr></table>";
+    echo  ipal_make_instructor_question_list();
+    echo "<br><br>";
+    $state = $DB->get_record('ipal', array('id' => $ipal->id));
+    if ($state->preferredbehaviour == "Graph") {
+        if (ipal_show_current_question() == 1) {
+            echo "<br>";
+            echo "<br>";
+            echo "<iframe id= \"graphIframe\" src=\"graphics.php?ipalid=".$ipal->id."\" height=\"535\" width=\"723\"></iframe>";
+            echo "<br><br><a onclick=\"newwindow=window.open('popupgraph.php?ipalid=".$ipal->id."', '',
+                    'width=620,height=450,toolbar=no,location=no,menubar=no,copyhistory=no,status=no,";
+            echo "directories=no,scrollbars=yes,resizable=yes');
+                    return false;\"
+                    href=\"popupgraph.php?ipalid=".$ipal->id."\" target=\"_blank\">Open a new window for the graph.</a>";
+        }
+    } else {
+        echo "<br>";
+        echo "<br>";
+        echo "<iframe id= \"graphIframe\" src=\"gridview.php?id=".$ipal->id.
+            "\" height=\"535\" width=\"723\"></iframe>";
+        echo "<br><br><a onclick=\"window.open('popupgraph.php?ipalid=".$ipal->id."', '',
+                'width=620,height=450,toolbar=no,location=no,menubar=no,copyhistory=no,status=no,
+                directories=no,scrollbars=yes,resizable=yes');
+                return false;\"
+                href=\"popupgraph.php?ipalid=".$ipal->id."\" target=\"_blank\">Open a new window for the graph.</a>";
+    }
+}
+

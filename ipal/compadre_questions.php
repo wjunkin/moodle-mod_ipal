@@ -25,10 +25,11 @@
 
 require_once('../../config.php');
 require_once($CFG->dirroot . '/mod/ipal/locallib.php');
-require_once($CFG->dirroot . '/mod/ipal/question/engine/lib.php');// This is needed for Class 'question_display_options'.
+require_once($CFG->dirroot . '/mod/ipal/question/engine/lib.php');// This is needed for class 'question_display_options'.
 require_once($CFG->dirroot . '/mod/ipal/question/engine/bank.php');
 require_once($CFG->dirroot . '/mod/ipal/editlib.php');
 require_once($CFG->dirroot . '/mod/ipal/quiz/ipal_xmlparser.php');
+require_once($CFG->dirroot . '/question/editlib.php');// Needed for the function question_edit_setup.
 $cmid = required_param('cmid', PARAM_INT);
 $cm = $DB->get_record('course_modules', array('id' => $cmid));
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
