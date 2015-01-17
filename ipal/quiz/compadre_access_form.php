@@ -22,11 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-if (!isset($module->version)) {
-    $module = new stdClass;
+if (!isset($plugin->version)) {
+    $plugin = new stdClass;
     require($CFG->dirroot . '/mod/ipal/version.php');// Getting IPAL version to send to ComPADRE.
 }
-$ipalversion = $module->version;
+$ipalversion = $plugin->version;
 $compadreurl = 'http://www.compadre.org/ipal/index.cfm?ipalversion='.$ipalversion;
 // The compadreurl will need to be put in here or have this obtained from somewhere in the moodle code.
 echo "<form method='POST' action='$compadreurl'>";
