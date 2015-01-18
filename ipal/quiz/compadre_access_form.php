@@ -30,6 +30,8 @@ $ipalversion = $plugin->version;
 $compadreurl = 'http://www.compadre.org/ipal/index.cfm?ipalversion='.$ipalversion;
 // The compadreurl will need to be put in here or have this obtained from somewhere in the moodle code.
 echo "<form method='POST' action='$compadreurl'>";
+// This line needs to be changed (For the ComPADRE site) each time there is a version of Moodle requiring a new IPAL version.
+echo "\n<input type='hidden' name='moodleversion' value='2.7'>";
 echo "\n<input type='hidden' name='email' value='".$USER->email."'>";
 echo "\n<input type='hidden' name='emailhash' value='".sha1($USER->email)."'>";
 echo "\n<input type='hidden' name='firstName' value='".$USER->firstname."'>";
