@@ -15,16 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Prints out the id for the current question (the id for the iapl_active_question based on the id of the ipal instance
+ * Prints out the id for the current question (the id for the ipal_active_question based on the id of the ipal instance
  *
+ * This script, with this one function, may be run thousands of times a second,
+ * since it is run every 3 seconds by the browser on every student involved in any ipal polling session.
+ * Therefore, it is very important that it run very fast and not overload the server.
+ * For this reason, the GET method is used to obtain the ipalid instead of the optional_param function.
+ * If someone uses this function outside of its intended use, the only information returned will be the 
+ * question id of the current question for that ipal. They will not have access to the question itself.
  * @package    mod_ipal
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
-global $DB;
-$ipalid = $_GET['ipalid'];
+defined('MOODLE_INTERNAL') || die();
+
+$ipalid = intval($_GET['ipalid']);
 if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
     $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
     echo $question->id;

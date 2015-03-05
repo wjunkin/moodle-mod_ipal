@@ -59,13 +59,6 @@ if (!$course) {
 // You need mod/quiz:manage in addition to question capabilities to access this page.
 require_capability('mod/quiz:manage', $contexts->lowest());
 
-$params = (array) data_submitted();
-foreach ($params as $key => $value) {
-    if (preg_match('!^s([0-9]+)$!', $key, $matches)) {
-        $selectedquestionids[] = $matches[1];
-    }
-}
-
 $afteractionurl = new moodle_url($thispageurl);
 if ($scrollpos) {
     $afteractionurl->param('scrollpos', $scrollpos);

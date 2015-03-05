@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Function to generate the random string required to identify questions.
  *
@@ -42,32 +44,10 @@ function ipal_random_string ($length = 15) {
 }
 
 /**
- * Function to filter out bad characters to from a question.
- *
- * @param string $text TExt to be filtered.
- * @return string The filtered string.
- */
-function ipal_filter_var($text) {
-    if (strlen($text) == 0) {
-        return;
-    }
-    for ($i = 0; $i < strlen($text); $i++) {
-        $asc[$i] = ord(substr($text, $i, 1));
-        if ($asc[$i] > 127) {
-            $ch[$i] = '&#'.$asc[$i];
-        } else {
-            $ch[$i] = chr($asc[$i]);
-        }
-    }
-    $cleantext = join('', $ch);
-    return $cleantext;
-}
-
-/**
  * Function to create a generic multichoice question if it does not exist.
  *
  * The question is created in the default category for the course and thename of the question is Generic multichoice (1-8).
- * The function requires the ipal_random_string() function and ipal_filter_var() function.
+ * The function requires the ipal_random_string() function and function.
  * @param int $courseid The id of the course
  * @return bool True if successful.
  */

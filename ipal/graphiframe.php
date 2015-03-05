@@ -21,13 +21,23 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$state = $DB->get_record('ipal', array('id' => $ipalid));
-if ($state->preferredbehaviour == "Graph") {
-    echo "<br>";
-    echo "<br>";
-    if (ipal_show_current_question() == 1) {
-        echo "<iframe id= \"graphIframe\" src=\"graphics.php?ipalid=".$ipalid."\" height=\"535\" width=\"723\"></iframe>";
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * The function which prints out the graph of responses in the iframe.
+ *
+ * @param int $ipalid The id of this ipal instance.
+ */
+function ipal_print_graph($ipalid) {
+    global $DB;
+    $state = $DB->get_record('ipal', array('id' => $ipalid));
+    if ($state->preferredbehaviour == "Graph") {
+        echo "<br>";
+        echo "<br>";
+        if (ipal_show_current_question_bool($state) == 1) {
+            echo "<iframe id= \"graphIframe\" src=\"graphics.php?ipalid=".$ipalid."\" height=\"535\" width=\"723\"></iframe>";
+        }
+    } else {
+        echo "<iframe id= \"graphIframe\" src=\"gridview.php?id=".$ipalid."\" height=\"535\" width=\"723\"></iframe>";
     }
-} else {
-    echo "<iframe id= \"graphIframe\" src=\"gridview.php?id=".$ipalid."\" height=\"535\" width=\"723\"></iframe>";
 }

@@ -59,13 +59,6 @@ if (!$course) {
 // You need mod/quiz:manage in addition to question capabilities to access this page.
 require_capability('mod/quiz:manage', $contexts->lowest());
 
-$params = (array) data_submitted();
-foreach ($params as $key => $value) {
-    if (preg_match('!^s([0-9]+)$!', $key, $matches)) {
-        $selectedquestionids[] = $matches[1];
-    }
-}
-
 $afteractionurl = new moodle_url($thispageurl);
 if ($scrollpos) {
     $afteractionurl->param('scrollpos', $scrollpos);
@@ -102,16 +95,18 @@ $categories = $DB->get_records_menu('question_categories', array('contextid' => 
 $cats = $DB->get_records('question_categories', array('contextid' => "$mycontextid"));
 
 echo $OUTPUT->heading('Adding questions from ComPADRE for ' . $ipal->name, 2);// Modified for ipal.
-if (isset($_POST['questionxmlencode']) and (strlen($_POST['questionxmlencode']) > 0)) {
+$questionxmlencode = optional_param('questionxmlencode', '', PARAM_TEXT);
+if (isset($questionxmlencode) and (strlen($questionxmlencode) > 0)) {
     require_once($CFG->dirroot . '/mod/ipal/quiz/adding_compadre_questions.php');
     echo '</div>';
     echo $OUTPUT->footer();
     exit;
 }
 
-if (isset($_POST['questiondata']) and (strlen($_POST['questiondata']) > 1) and isset($_POST['xmlurl'])
-        and (strlen($_POST['xmlurl']))) {
-    $questiondata = $_POST['questiondata'];// The question data that came from ComPADRE.
+$questiondata = optional_param('questiondata', '', PARAM_RAW);// The question data that came from ComPADRE.
+$xmlurl = optional_param('xmlurl', '', PARAM_URL);
+if (isset($questiondata) and (strlen($questiondata) > 1) and isset($xmlurl)
+        and (strlen($xmlurl))) {
     list($data, $qs) = moodlexmlquiz2array($questiondata);
     if (count($data) > 1) {
         echo "\n<br />Here are the questions you selected.";
@@ -136,10 +131,10 @@ if (isset($_POST['questiondata']) and (strlen($_POST['questiondata']) > 1) and i
     echo "\n</select>";
     // The URL must be passed on t the next page so that the complete questions can be obtained.
     // The URL is found in the POST'xmlurl'] value. The ipal root must be pre-pended to this value.
-    echo "\n<input type='hidden' name='xmlurl' value='".$_POST['xmlurl']."'>";
+    echo "\n<input type='hidden' name='xmlurl' value='".$xmlurl."'>";
     echo "\n<br /><input type='submit' name='submit' value='Add these questions to this category'>";
     echo "\n</form>";
-    echo "\n<br /><form method='get' action ='ipal_quiz_edit.php'>";
+    echo "\n<br /><form method='get' action ='edit.php'>";
     echo "\n<input type='hidden' name='cmid' value='".$ipal->cmid."'>";
     echo "\n<input type='submit' value='Oops. I do not want to add any of these questions to the databank'>";
     echo "\n</form>";

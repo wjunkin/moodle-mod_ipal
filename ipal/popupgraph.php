@@ -26,33 +26,48 @@
 <html>
 <head>
 <?php
-echo "<meta http-equiv=\"refresh\" content=\"3;url=?ipalid=".$_GET['ipalid']."\">";
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+$ipalid = optional_param('ipalid', 0, PARAM_INT);// The id of this IPAL instance.
+echo "<meta http-equiv=\"refresh\" content=\"3;url=?ipalid=".$ipalid."\">";
 ?>
 </head>
 <body>
 <?php
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+$ipal = $DB->get_record('ipal', array('id' => $ipalid));
+$course = $DB->get_record('course', array('id' => $ipal->course), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('ipal', $ipal->id, $course->id, false, MUST_EXIST);
+require_login($course, true, $cm);
+$contextinstance = context_module::instance($cm->id);
+if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
+    echo "\n<br />You must be authorized to access this site";
+    exit;
+}
 
 /**
  * Return the id for the current question
  *
+ * @param obj $state The object giving information about the ipal instance.
  * @return int The ID for the current question.
  */
-function ipal_show_current_question() {
+function ipal_show_current_question_bool($state) {
     global $DB;
-    global $state;
+
     $ipal = $state;
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
         $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipal->id));
         $questiontext = $DB->get_record('question', array('id' => $question->question_id));
+        // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+        $questiontext->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $questiontext->questiontext);
         echo "The current question is -> ".strip_tags($questiontext->questiontext);
         return(1);
     } else {
         return(0);
     }
 }
-$ipalid = $_GET['ipalid'];
+
 require_once('graphiframe.php');
+// Print out the graph.
+ipal_print_graph($ipalid);
 ?>
 </body>
 </html>

@@ -31,6 +31,16 @@
 <?php
 require_once('../../config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
+$ipalid = optional_param('ipalid', 0, PARAM_INT);
+$ipal = $DB->get_record('ipal', array('id' => $ipalid));
+$course = $DB->get_record('course', array('id' => $ipal->course), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('ipal', $ipal->id, $course->id, false, MUST_EXIST);
+require_login($course, true, $cm);
+$contextinstance = context_module::instance($cm->id);
+if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
+    echo "\n<br />You must be authorized to access this site";
+    exit;
+}
 
 /**
  * Return the id for the current question
@@ -38,7 +48,7 @@ require_once($CFG->dirroot.'/lib/graphlib.php');
  * @param int $ipalid The ID for the IPAL instance
  * @return int The ID for the current question.
  */
-function ipal_show_current_question_id($ipalid) {
+function ipal_show_current_question_id_graphics($ipalid) {
     global $DB;
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
         $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
@@ -85,7 +95,7 @@ function ipal_who_thistime($ipalid) {// What answers::user_id have been given to
  * @param int $ipalid The ID for the IPAL instance
  * @return int The number of students submitting answers.
  */
-function ipal_who_sofar($ipalid) {
+function ipal_who_sofar_count($ipalid) {
     global $DB;
     $records = $DB->get_records('ipal_answered', array('ipal_id' => $ipalid));
     foreach ($records as $records) {
@@ -101,7 +111,8 @@ function ipal_who_sofar($ipalid) {
  */
 function ipal_count_thistime_responses() {// How many responses to this question this time.
     global $DB;
-    $questioncode = ipal_current_question_code((int)$_GET['ipalid']);
+    $ipalid = optional_param('ipalid', 0, PARAM_INT);
+    $questioncode = ipal_current_question_code($ipalid);
     $total = $DB->count_records('ipal_answered', array('ipal_code' => $questioncode));
     return((int)$total);
 }
@@ -114,8 +125,10 @@ function ipal_count_thistime_responses() {// How many responses to this question
  */
 function ipal_count_active_responses() {
     global $DB;
-    $questionid = ipal_show_current_question_id((int)$_GET['ipalid']);
-    $total = $DB->count_records('ipal_answered', array('question_id' => $questionid, 'ipal_id' => (int)$_GET['ipalid']));
+    $ipalid = optional_param('ipalid', 0, PARAM_INT);
+    $questionid = ipal_show_current_question_id_graphics($ipalid);
+    $ipalid = optional_param('ipalid', 0, PARAM_INT);
+    $total = $DB->count_records('ipal_answered', array('question_id' => $questionid, 'ipal_id' => ($ipalid)));
     return((int)$total);
 }
 
@@ -128,7 +141,7 @@ function ipal_count_active_responses() {
  */
 function ipal_count_question_codes($questioncode) {// What questions and what responses were given each time question sent.
     global $DB;
-    global $ipal;
+
     $question = $DB->get_record('ipal_active_questions', array('id' => $questioncode));
     $questionid = $question->question_id;
     $answers = $DB->get_records('question_answers', array('question' => $questionid));
@@ -142,28 +155,7 @@ function ipal_count_question_codes($questioncode) {// What questions and what re
 }
 
 
-/**
- * Return a string = number of responses to each question and labels for questions.
- *
- * @param int $questionid The question id in the active question table for the active question.
- * @return string The number of responses to each question and labels for questions.
- */
-function ipal_count_questions($questionid) {
-    global $DB;
-    global $ipal;
-    $answers = $DB->get_records('question_answers', array('question' => $questionid));
-    foreach ($answers as $answers) {
-        $labels[] = preg_replace("/[^A-Za-z0-9 ]/", "", substr(strip_tags($answers->answer), 0, 20));
-
-        $data[] = $DB->count_records('ipal_answered', array('ipal_id' => $_GET['ipalid'], 'answer_id' => $answers->id));
-
-    }
-
-    return( "?data=".implode(",", $data)."&labels=".implode(",", $labels)."&total=10");
-
-}
-
-echo "Total Responses --> ".ipal_count_thistime_responses()."/".ipal_who_sofar($_GET['ipalid']);
+echo "Total Responses --> ".ipal_count_thistime_responses()."/".ipal_who_sofar_count($ipalid);
 
 /**
  * A function to optain the question type of a given question.
@@ -209,15 +201,15 @@ function ipal_thistime_essay_answers($ipalid) {// Get the essay answers for this
  */
 function ipal_display_essay_answers($ipalid) {
     global $DB;
-    $questionid = ipal_show_current_question_id($ipalid);
+    $questionid = ipal_show_current_question_id_graphics($ipalid);
     $answerids = $DB->get_records('ipal_answered', array('question_id' => $questionid));
     foreach ($answerids as $id) {
         $answers[] = $id->a_text;
     }
     return($answers);
 }
-$ipalid = $_GET['ipalid'];
-$qtype = ipal_get_question_type(ipal_show_current_question_id($ipalid));
+
+$qtype = ipal_get_question_type(ipal_show_current_question_id_graphics($ipalid));
 if ($qtype == 'essay') {
     $answers = ipal_thistime_essay_answers($ipalid);
     foreach ($answers as $answer) {

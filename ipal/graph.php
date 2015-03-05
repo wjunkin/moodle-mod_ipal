@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Creates the IPAL HIstogram graph. It determines the values and then uses the /lib/graphlib.php script.
+ * Creates the IPAL HIstogram graph. It uses the param values and then uses the /lib/graphlib.php script.
  *
  * @package    mod_ipal
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
@@ -23,14 +23,18 @@
  */
 require_once('../../config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
+defined('MOODLE_INTERNAL') || die();
+$labels = optional_param('labels', '', PARAM_TAGLIST);
+$data = optional_param('data', '', PARAM_TAGLIST);
+$total = optional_param('total', '', PARAM_INT);
 $line = new graph(700, 500);
 $line->parameter['title']   = '';
 $line->parameter['y_label_left'] = 'Number of Responses';
-$line->x_data = explode(",", $_GET["labels"]);
-$line->y_data['responses'] = explode(",", $_GET["data"]);
+$line->x_data = explode(",", $labels);
+$line->y_data['responses'] = explode(",", $data);
 $line->y_format['responses'] = array('colour' => 'blue', 'bar' => 'fill', 'shadow_offset' => 3);
 $line->y_order = array('responses');
 $line->parameter['y_min_left'] = 0;
-$line->parameter['y_max_left'] = $_GET["total"];
+$line->parameter['y_max_left'] = $total;
 $line->parameter['y_decimal_left'] = 0;
 $line->draw();

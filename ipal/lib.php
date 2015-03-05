@@ -211,6 +211,7 @@ function ipal_transfer_archive() {
 
         foreach ($courseroster as $key => $value) {
             $courseid = $key;
+            // The int $courseid is the id for this course and the $studentroleid is the student role integer (default=5).
             $query = "SELECT ra.userid FROM {role_assignments} ra, {context} cx
                 WHERE ra.contextid = cx.id AND cx.instanceid = $courseid AND ra.roleid = $studentroleid AND cx.contextlevel = 50";
             $studentids = $DB->get_records_sql($query);

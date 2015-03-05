@@ -108,12 +108,6 @@ if ($quiz->shufflequestions) {
 
 // Get the list of question ids had their check-boxes ticked.
 $selectedquestionids = array();
-$params = (array) data_submitted();
-foreach ($params as $key => $value) {
-    if (preg_match('!^s([0-9]+)$!', $key, $matches)) {
-        $selectedquestionids[] = $matches[1];
-    }
-}
 
 $afteractionurl = new moodle_url($thispageurl);
 if ($scrollpos) {
@@ -149,9 +143,11 @@ if (($addquestion = optional_param('addquestion', 0, PARAM_INT)) && confirm_sess
 }
 
 if (optional_param('add', false, PARAM_BOOL) && confirm_sesskey()) {
-    // Add selected questions to the current quiz.
+    // Add selected questions to the current ipal. The use of data_submitted is copied from the quiz module.
     $rawdata = (array) data_submitted();
+    // The data_submitted function is used because the value of the desired keys is unknown.
     foreach ($rawdata as $key => $value) { // Parse input for question ids.
+        // Every desired key must be of the form q(integer). Only the key values are used in the program.
         if (preg_match('!^q([0-9]+)$!', $key, $matches)) {
             $key = $matches[1];
             ipal_add_quiz_question($key, $quiz);
@@ -192,107 +188,6 @@ if (optional_param('quizdeleteselected', false, PARAM_BOOL) &&
     }
     quiz_delete_previews($quiz);
     quiz_update_sumgrades($quiz);
-    redirect($afteractionurl);
-}
-
-if (optional_param('savechanges', false, PARAM_BOOL) && confirm_sesskey()) {
-    $deletepreviews = false;
-    $recomputesummarks = false;
-
-    $oldquestions = explode(',', $quiz->questions); // The questions in the old order.
-    $questions = array(); // For questions in the new order.
-    $rawdata = (array) data_submitted();
-    $moveonpagequestions = array();
-    $moveselectedonpage = optional_param('moveselectedonpagetop', 0, PARAM_INT);
-    if (!$moveselectedonpage) {
-        $moveselectedonpage = optional_param('moveselectedonpagebottom', 0, PARAM_INT);
-    }
-
-    foreach ($rawdata as $key => $value) {
-        if (preg_match('!^g([0-9]+)$!', $key, $matches)) {
-            // Parse input for question -> grades.
-            $questionid = $matches[1];
-            $quiz->grades[$questionid] = unformat_float($value);
-            quiz_update_question_instance($quiz->grades[$questionid], $questionid, $quiz);
-            $deletepreviews = true;
-            $recomputesummarks = true;
-
-        } else if (preg_match('!^o(pg)?([0-9]+)$!', $key, $matches)) {
-            // Parse input for ordering info.
-            $questionid = $matches[2];
-            // Make sure two questions don't overwrite each other. If we get a second
-            // question with the same position, shift the second one along to the next gap.
-            $value = clean_param($value, PARAM_INT);
-            while (array_key_exists($value, $questions)) {
-                $value++;
-            }
-            if ($matches[1]) {
-                // This is a page-break entry.
-                $questions[$value] = 0;
-            } else {
-                $questions[$value] = $questionid;
-            }
-            $deletepreviews = true;
-        }
-    }
-
-    // If ordering info was given, reorder the questions.
-    if ($questions) {
-        ksort($questions);
-        $questions[] = 0;
-        $quiz->questions = implode(',', $questions);
-        $DB->set_field('quiz', 'questions', $quiz->questions, array('id' => $quiz->id));
-        $deletepreviews = true;
-    }
-
-    // Get a list of questions to move, later to be added in the appropriate
-    // place in the string.
-    if ($moveselectedonpage) {
-        $questions = explode(',', $quiz->questions);
-        $newquestions = array();
-        // Remove the questions from their original positions first.
-        foreach ($questions as $questionid) {
-            if (!in_array($questionid, $selectedquestionids)) {
-                $newquestions[] = $questionid;
-            }
-        }
-        $questions = $newquestions;
-
-        // Move to the end of the selected page.
-        $pagebreakpositions = array_keys($questions, 0);
-        $numpages = count($pagebreakpositions);
-
-        // Ensure the target page number is in range.
-        for ($i = $moveselectedonpage; $i > $numpages; $i--) {
-            $questions[] = 0;
-            $pagebreakpositions[] = count($questions) - 1;
-        }
-        $moveselectedpos = $pagebreakpositions[$moveselectedonpage - 1];
-
-        // Do the move.
-        array_splice($questions, $moveselectedpos, 0, $selectedquestionids);
-        $quiz->questions = implode(',', $questions);
-
-        // Update the database.
-        $DB->set_field('quiz', 'questions', $quiz->questions, array('id' => $quiz->id));
-        $deletepreviews = true;
-    }
-
-    // If rescaling is required save the new maximum.
-    $maxgrade = unformat_float(optional_param('maxgrade', -1, PARAM_RAW));
-    if ($maxgrade >= 0) {
-        quiz_set_grade($maxgrade, $quiz);
-    }
-
-    if ($deletepreviews) {
-        quiz_delete_previews($quiz);
-    }
-    if ($recomputesummarks) {
-        quiz_update_sumgrades($quiz);
-        quiz_update_all_attempt_sumgrades($quiz);
-        quiz_update_all_final_grades($quiz);
-        quiz_update_grades($quiz, 0, true);
-    }
     redirect($afteractionurl);
 }
 
@@ -375,7 +270,8 @@ $notifystrings = array();
 echo '<div class="editq">';
 
 $ipal = $quiz;
-echo ipal_make_instructor_question_list();
+$ipalid = $ipal->id;
+echo ipal_make_instructor_question_list($cmid, $ipalid);
 echo '</div>';
 
 // Close <div class="quizcontents">.

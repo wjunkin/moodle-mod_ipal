@@ -43,6 +43,7 @@ if ($id) {
         error('You must specify a course_module ID or an instance ID');
     }
 }
+require_login($course, true, $cm);
 
 // Require_login($course, true, $cm);/Find out why this causes an error.
 $context = context_module::instance($course->id);

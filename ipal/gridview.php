@@ -22,7 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once('../../config.php');
-global $DB;
+$ipalid = optional_param('id', 0, PARAM_INT);// The id for this IPAL instance.
+$ipal = $DB->get_record('ipal', array('id' => $ipalid));
+$course = $DB->get_record('course', array('id' => $ipal->course), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('ipal', $ipal->id, $course->id, false, MUST_EXIST);
+require_login($course, true, $cm);
+$contextinstance = context_module::instance($cm->id);
+if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
+    echo "\n<br />You must be authorized to access this site";
+    exit;
+}
 
 /**
  * Return the number of users who have submitted answers to this IPAL instance.
@@ -30,7 +39,7 @@ global $DB;
  * @param int $ipalid The ID for the IPAL instance
  * @return int The number of students submitting answers.
  */
-function ipal_who_sofar($ipalid) {
+function ipal_who_sofar_gridview($ipalid) {
     global $DB;
 
     $records = $DB->get_records('ipal_answered', array('ipal_id' => $ipalid));
@@ -45,21 +54,20 @@ function ipal_who_sofar($ipalid) {
     }
 }
 
-
 /**
  * Return the first and last name of a student.
  *
  * @param int $userid The ID for the student.
  * @return string The last name, first name of the student.
  */
-function ipal_find_student($userid) {
+function ipal_find_student_gridview($userid) {
      global $DB;
      $user = $DB->get_record('user', array('id' => $userid));
      $name = $user->lastname.", ".$user->firstname;
      return($name);
 }
 
-$ipal = $DB->get_record('ipal', array('id' => (int)$_GET['id']));
+$ipal = $DB->get_record('ipal', array('id' => $ipalid));
 $questions = explode(",", $ipal->questions);
 echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"gridviewstyle.css\" />";
 echo "<table border=\"1\" width=\"100%\">\n";
@@ -77,14 +85,14 @@ foreach ($questions as $question) {
 }
 echo "</tr>\n</thead>\n";
 
-$users = ipal_who_sofar($ipal->id);
+$users = ipal_who_sofar_gridview($ipal->id);
 if (isset($users)) {
     foreach ($users as $user) {
         echo "<tbody><tr>";
 
         // If anonymous, exlude the student name data from the table.
         if (!$ipal->anonymous) {
-            echo "<td>".ipal_find_student($user)."</td>\n";
+            echo "<td>".ipal_find_student_gridview($user)."</td>\n";
         }
         foreach ($questions as $question) {
             if (($question != "") and ($question != 0)) {

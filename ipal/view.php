@@ -70,11 +70,11 @@ $PAGE->set_button(update_module_button($cm->id, $course->id, get_string('modulen
 // Output starts here.
 echo $OUTPUT->header();
 
-ipal_print_anonymous_message();
+ipal_print_anonymous_message($ipal);
 if (has_capability('mod/ipal:instructoraccess', $context)) {
-    ipal_display_instructor_interface($cm->id);
+    ipal_display_instructor_interface($cm->id, $ipal->id);
 } else {
-    ipal_display_student_interface();
+    ipal_display_student_interface($ipal->id);
 }
 
 // Finish the page.

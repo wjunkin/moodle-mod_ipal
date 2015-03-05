@@ -15,14 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This script echos back a hash to let the client know if the question has changed.
+ * This script echos back a hash to let the client know if the graph for the question has changed.
  *
+ * Since this script sends back no useful information (other than a change in the hash to indicate the
+ * graph has changed) no authentication as teacher is required.
  * @package    mod_ipal
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once('../../config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Return the id for the current question
@@ -57,12 +60,14 @@ function ipal_get_qtype($questionid) {
 /**
  * Return a string = number of responses to each question and labels for questions.
  *
+ * Since this script must run as quickly as possible to refresh graphs, $_GET is used instead of optional_param().
  * @param int $questionid The question id in the active question table for the active question.
+ * @param int $ipalid The id of this ipal instance.
  * @return string The number of responses to each question and labels for questions.
  */
-function ipal_count_questions($questionid) {
+function ipal_count_questions($questionid, $ipalid) {
     global $DB;
-    global $ipal;
+
     $qtype = ipal_get_qtype($questionid);
     if ($qtype == 'essay') {
         $labels[] = 'Responses';
@@ -76,7 +81,7 @@ function ipal_count_questions($questionid) {
         $answers = $DB->get_records('question_answers', array('question' => $questionid));
         foreach ($answers as $answers) {
             $labels[] = $answers->answer;
-            $data[] = $DB->count_records('ipal_answered', array('ipal_id' => $_GET['ipalid'], 'answer_id' => $answers->id));
+            $data[] = $DB->count_records('ipal_answered', array('ipal_id' => $ipalid, 'answer_id' => $answers->id));
 
         }
     }
@@ -84,4 +89,5 @@ function ipal_count_questions($questionid) {
 
 }
 
-echo md5("graph.php".ipal_count_questions(ipal_show_current_question_id($_GET['ipalid'])));
+$ipalid = optional_param('ipalid', 0, PARAM_INT);
+echo md5("graph.php".ipal_count_questions(ipal_show_current_question_id($ipalid), $ipalid));

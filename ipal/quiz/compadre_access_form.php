@@ -22,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+ // You need mod/quiz:manage in addition to question capabilities to access this page.
+require_capability('mod/quiz:manage', $contexts->lowest());
+
 if (!isset($module->version)) {
     $module = new stdClass;
     require($CFG->dirroot . '/mod/ipal/version.php');// Getting IPAL version to send to ComPADRE.

@@ -50,14 +50,7 @@ if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
     echo $OUTPUT->footer();
     exit;
 }
-foreach ($_GET as $key => $value) {
-    $$key = $value;
-    if ($key == 'qid') {
-        foreach ($_GET['qid'] as $qkey => $qvalue) {
-            $qid[$qkey] = $qvalue;
-        }
-    }
-}
+
 echo "Click <a href='".$CFG->wwwroot."/mod/ipal/edit.php?cmid=$cmid'>here</a> to return to IPAL activity.";
 
 $coursecontext = $DB->get_record('context', array('instanceid' => $course->id, 'contextlevel' => 50));

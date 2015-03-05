@@ -18,6 +18,16 @@
  *
  * This file is used with IPAL Apps to log in an authenticate students responding with IPAL Apps.
  *
+ * This script checks to verify that the passcode is correct for some ipal instance for which responses
+ * from mobile devices has been allowed by the teacher. If the passcode is correct and responses from mobile devices
+ * is allowed, this program then determines the course and verifies that the user name is correct for someone
+ * registered in the course. The verification that the password is correct for that user name is 
+ * done by the IPAL App so that the password is not saved on the mobile device. Thus, this page veifies
+ * that the pass code is correct for an ipal instance and that the user name is correct for someone
+ * in the course where the ipal instance is located, but this page does not require the usual Moodle
+ * authentication.
+ * If the authentication is correct, the page returns the active question (if there is one) and allows the user
+ * to submit an answer.
  * @package    mod_ipal
  * @copyright  2013 Bill Junkin, Eckerd College (http://www.eckerd.edu)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -88,6 +98,7 @@ if (!$setipal && !$setuser) {
     if ($regid) {
         add_regid($regid, $username);
     }
-    ipal_tempview_display_question($userid, $passcode, $username);
+    $ipalid = $ipal->id;
+    ipal_tempview_display_question($userid, $passcode, $username, $ipalid);
 }
 echo "</body>\n</html>";

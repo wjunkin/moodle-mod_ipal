@@ -33,7 +33,6 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $questionid The id of the question that has been answered in this ipal.
  */
 function ipal_get_answers($questionid) {
-    global $ipal;
     global $DB;
     global $CFG;
     $line = "";
@@ -43,43 +42,6 @@ function ipal_get_answers($questionid) {
         $line .= "&nbsp;";
     }
     return($line);
-}
-
-/**
- * Setup The Grid View to display to the tacher.
- */
-function ipal_grid_view() {
-    global $DB;
-    global $ipal;
-
-    $questions = explode(",", $ipal->questions);
-
-    echo "<table border=\"1\" width=\"100%\">\n";
-    echo "<tr><td>Name</td>\n";
-    foreach ($questions as $question) {
-        $questiondata = $DB->get_record('question', array('id' => $question));
-        echo "<td><div style=\"word-wrap: break-word;\">".substr(trim(strip_tags($questiondata->name)), 0, 80)."</div></td>\n";
-    }
-    echo "</tr>\n";
-
-    foreach (ipal_who_sofar($ipal->id) as $user) {
-        echo "<tr><td>".ipal_find_student($user)."</td>\n";
-        foreach ($questions as $question) {
-            if ($question != "") {
-                $answer = $DB->get_record('ipal_answered', array('ipal_id' => $ipal->id, 'user_id' => $user,
-                    'question_id' => $question));
-                if (!$answer) {
-                    echo "<td>&nbsp;</td>\n";
-                } else {
-                    $answerdata = $DB->get_record('question_answers', array('id' => $answer->answer_id));
-                    echo "<td><div style=\"word-wrap: break-word;\">".
-                        substr(trim(strip_tags($answerdata->answer)), 0, 40)."</div></td>\n";
-                }
-            }
-        }
-        echo "</tr>\n";
-    }
-    echo "</table>\n";
 }
 
 /**
@@ -130,7 +92,6 @@ function ipal_find_student_responses($userid, $ipalid) {
  * @return array The array of answers submitted by students.
  */
 function ipal_get_answers_student($questionid) {
-    global $ipal;
     global $DB;
     global $CFG;
 
@@ -148,11 +109,9 @@ function ipal_get_answers_student($questionid) {
  * @param int $qid Teh question id
  */
 function ipal_get_questions_student($qid) {
-
-    global $ipal;
     global $DB;
     global $CFG;
-    $q = '';
+
     $pagearray2 = array();
 
     $aquestions = $DB->get_record('question', array('id' => $qid));
@@ -202,20 +161,18 @@ function ipal_get_questionbank_questions($coursecontextid, $cmid, $ipalid) {
 
 /**
  * Get the questions in any context (like the instructor).
+ *
+ * @param int $ipalid The id for this IPAL instance.
  */
-function ipal_get_questions() {
-
-    global $ipal;
+function ipal_get_questions($ipalid) {
     global $DB;
     global $CFG;
     $q = '';
     $pagearray2 = array();
-    // Is there an quiz associated with an ipal?
-    // Get quiz and put it into an array.
-    $quiz = $DB->get_record('ipal', array('id' => $ipal->id));
+    $ipal = $DB->get_record('ipal', array('id' => $ipalid));
 
     // Get the question ids.
-    $questions = explode(",", $quiz->questions);
+    $questions = explode(",", $ipal->questions);
 
     // Get the questions and stuff them into an array.
     foreach ($questions as $q) {
@@ -234,14 +191,15 @@ function ipal_get_questions() {
 /**
  * This function counts anwers to a question based on ipal id.
  * @param int $questionid The question ID.
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_count_questions($questionid) {
+function ipal_count_questions($questionid, $ipalid) {
     global $DB;
-    global $ipal;
+
     $answers = $DB->get_records('question_answers', array('question' => $questionid));
     foreach ($answers as $answers) {
         $labels[] = htmlentities(substr($answers->answer, 10));
-        $data[] = $DB->count_records('ipal_answered', array('ipal_id' => $ipal->id, 'answer_id' => $answers->id));
+        $data[] = $DB->count_records('ipal_answered', array('ipal_id' => $ipalid, 'answer_id' => $answers->id));
     }
 
     return( "?data=".implode(",", $data)."&labels=".implode(",", $labels)."&total=10");
@@ -274,25 +232,34 @@ function ipal_create_standard_icon($action) {
 
 /**
  * This function create the form for the instructors (or anyone higher than a student) to view.
+ *
+ * @param int $ipalid The id of this IPAL instance
+ * @param int $cmid The id of this IPAL course module.
  */
-function ipal_make_instructor_form() {
-    global $ipal;
+function ipal_make_instructor_form($ipalid, $cmid) {
     global $CFG;
     global $PAGE;
-    global $cm;
-    $myform = "<form action=\"?".$_SERVER['QUERY_STRING']."\" method=\"post\">\n";
+
+    $mycmid = optional_param('id', '0', PARAM_INT);// The cmid of the IPAL instance.
+    if ($mycmid) {
+        $querystring = 'id='.$mycmid;
+    } else {
+        $querystring = '';
+    }
+
+    $myform = "<form action=\"?".$querystring."\" method=\"post\">\n";
     $myform .= "\n";
-    foreach (ipal_get_questions() as $items) {
+    foreach (ipal_get_questions($ipalid) as $items) {
         $previewurl = $CFG->wwwroot.'/question/preview.php?id='.
-            $items['id'].'&cmid='.$cm->id.
+            $items['id'].'&cmid='.$cmid.
             '&behaviour=deferredfeedback&correctness=0&marks=1&markdp=-2&feedback&generalfeedback&rightanswer&history';
         $myform .= "\n<input type=\"radio\" name=\"question\" value=\"".$items['id']."\" />";
         $myform .= "\n<a href=\"$previewurl\" onclick=\"return ipalpopup('".$items['id']."')\" target=\"_blank\">";
         $myform .= ipal_create_preview_icon()."</a>";
-        $myform .= "\n<a href=\"standalone_graph.php?id=".$items['id']."&ipalid=".$ipal->id."\" target=\"_blank\">[graph]</a>";
+        $myform .= "\n<a href=\"standalone_graph.php?id=".$items['id']."&ipalid=".$ipalid."\" target=\"_blank\">[graph]</a>";
         $myform .= "\n".$items['question']."<br /><br />\n";
     }
-    if (ipal_check_active_question()) {
+    if (ipal_check_active_question($ipalid)) {
         $myform .= "<input type=\"submit\" value=\"Send Question\" />\n</form>\n";
     } else {
         $myform .= "<input type=\"submit\" value=\"Start Polling\" />\n</form>\n";
@@ -303,19 +270,21 @@ function ipal_make_instructor_form() {
 
 /**
  * This function create the list of questionsfor the instructors (or anyone higher than a student) to view.
+ *
+ * @param int $cmid The id for this course module.
+ * @param int $ipalid The id for this IPAL instance.
  */
-function ipal_make_instructor_question_list() {
-    global $ipal;
+function ipal_make_instructor_question_list($cmid, $ipalid) {
     global $CFG;
     global $USER;
-    global $cm;
+
     $sesskey = $USER->sesskey;
     $myform = "";
     // Script to make the preview window a popout.
     $myform .= "\n<script language=\"javascript\" type=\"text/javascript\">
     \n function ipalpopup(id) {
         \n\t url = '".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
-    $myform .= $cm->id;
+    $myform .= $cmid;
     $myform .= "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
     $myform .= "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
     $myform .= "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
@@ -325,28 +294,28 @@ function ipal_make_instructor_question_list() {
     \n }
     \n </script>\n";
     $nquestion = 1;
-    $allquestions = ipal_get_questions();
+    $allquestions = ipal_get_questions($ipalid);
     foreach ($allquestions as $items) {
         $previewurl = $CFG->wwwroot.'/question/preview.php?id='.
-            $items['id'].'&cmid='.$cm->id.
+            $items['id'].'&cmid='.$cmid.
             '&behaviour=deferredfeedback&correctness=0&marks=1&markdp=-2&feedback&generalfeedback&rightanswer&history';
         $myform .= "\n<a href=\"$previewurl\" onclick=\"return ipalpopup('".$items['id']."')\" target=\"_blank\">";
         $myform .= ipal_create_standard_icon('preview')."</a>";
         $editurl = $CFG->wwwroot.'/question/question.php?returnurl=%2Fmod%2Fipal%2Fedit.php%3Fcmid=';
-        $editurl .= $cm->id.'&cmid='.$cm->id.'&id='.$items['id'];
+        $editurl .= $cmid.'&cmid='.$cmid.'&id='.$items['id'];
         $myform .= "\n<a href=\"$editurl\">";
         $myform .= ipal_create_standard_icon('edit')."</a>";
         if ($nquestion < count($allquestions)) {
-            $downurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cm->id.'&down='.$items['id'].'&sesskey='.$sesskey;
+            $downurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cmid.'&down='.$items['id'].'&sesskey='.$sesskey;
             $myform .= "\n<a href=\"$downurl\">";
             $myform .= ipal_create_standard_icon('down')."</a>";
         }
         if ($nquestion > 1) {
-            $upurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cm->id.'&up='.$items['id'].'&sesskey='.$sesskey;
+            $upurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cmid.'&up='.$items['id'].'&sesskey='.$sesskey;
             $myform .= "\n<a href=\"$upurl\">";
             $myform .= ipal_create_standard_icon('up')."</a>";
         }
-        $removeurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cm->id.'&remove='.$items['id'].'&sesskey='.$sesskey;
+        $removeurl = $CFG->wwwroot.'/mod/ipal/edit.php?cmid='.$cmid.'&remove='.$items['id'].'&sesskey='.$sesskey;
         $myform .= "\n<a href=\"$removeurl\">";
         $myform .= ipal_create_standard_icon('delete')."</a>";
         $myform .= "\n".$items['question']."<br /><br />\n";
@@ -359,62 +328,68 @@ function ipal_make_instructor_question_list() {
 
 /**
  * This function sets the question in the database so the client functions can find what quesiton is active.  And it does it fast.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_send_question() {
-    global $ipal;
+function ipal_send_question($ipalid) {
     global $DB;
     global $CFG;
 
-    $ipalcourse = $DB->get_record('ipal', array('id' => $ipal->id));
+    $myquestionid = optional_param('question', 0, PARAM_INT);// The id of the question being sent.
+
+    $ipal = $DB->get_record('ipal', array('id' => $ipalid));
     $record = new stdClass();
     $record->id = '';
-    $record->course = $ipalcourse->course;
+    $record->course = $ipal->course;
     $record->ipal_id = $ipal->id;
     $record->quiz_id = $ipal->id;
-    $record->question_id = $_POST['question'];
+    $record->question_id = $myquestionid;
     $record->timemodified = time();
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
         $mybool = $DB->delete_records('ipal_active_questions', array('ipal_id' => $ipal->id));
     }
     $lastinsertid = $DB->insert_record('ipal_active_questions', $record);
     if (($ipal->mobile == 1) || ($ipal->mobile == 3)) {
-        ipal_send_message_to_device();
+        $course = $DB->get_record('course', array('id' => $ipal->course));
+        ipal_send_message_to_device($course);
     }
 
 }
 
 /**
  * This function clears the current question.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_clear_question() {
-    global $ipal;
+function ipal_clear_question($ipalid) {
     global $DB;
 
-    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
-        $mybool = $DB->delete_records('ipal_active_questions', array('ipal_id' => $ipal->id));
+    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
+        $mybool = $DB->delete_records('ipal_active_questions', array('ipal_id' => $ipalid));
     }
 }
 
 
 /**
  * Java script for checking to see if the chart need to be updated.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_java_graphupdate() {
-    global $ipal;
+function ipal_java_graphupdate($ipalid) {
     global $DB;
     echo "\n\n<script type=\"text/javascript\">\nvar http = false;\nvar x=\"\";
         \n\nif(navigator.appName == \"Microsoft Internet Explorer\")
         {\nhttp = new ActiveXObject(\"Microsoft.XMLHTTP\");\n} else {\nhttp = new XMLHttpRequest();}";
     echo "\n\nfunction replace() { ";
     $t = '&t='.time();
-    echo "\nvar t=setTimeout(\"replace()\",10000);\nhttp.open(\"GET\", \"graphicshash.php?ipalid=".$ipal->id.$t."\", true);";
+    echo "\nvar t=setTimeout(\"replace()\",10000);\nhttp.open(\"GET\", \"graphicshash.php?ipalid=".$ipalid.$t."\", true);";
     echo "\nhttp.onreadystatechange=function() {\nif(http.readyState == 4) {\nif(http.responseText != x){";
     echo "\nx=http.responseText;\n";
-    $state = $DB->get_record('ipal', array('id' => $ipal->id));
+    $state = $DB->get_record('ipal', array('id' => $ipalid));
     if ($state->preferredbehaviour == "Graph") {
-        echo "document.getElementById('graphIframe').src=\"graphics.php?ipalid=".$ipal->id."\"";
+        echo "document.getElementById('graphIframe').src=\"graphics.php?ipalid=".$ipalid."\"";
     } else {
-        echo "document.getElementById('graphIframe').src=\"gridview.php?id=".$ipal->id."\"";
+        echo "document.getElementById('graphIframe').src=\"gridview.php?id=".$ipalid."\"";
     }
 
     echo "}\n}\n}\nhttp.send(null);\n}\nreplace();\n</script>";
@@ -423,15 +398,16 @@ function ipal_java_graphupdate() {
 
 /**
  * Java script for checking to see if the Question has Changed.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_java_questionupdate() {
-    global $ipal;
+function ipal_java_questionupdate($ipalid) {
     echo "\n\n<script type=\"text/javascript\">\nvar http = false;\nvar x=\"\";\nvar myCount=0;
         \n\nif(navigator.appName == \"Microsoft Internet Explorer\")
         {\nhttp = new ActiveXObject(\"Microsoft.XMLHTTP\");\n} else {\nhttp = new XMLHttpRequest();}";
 
-    echo "\n\nfunction replace() {\nvar t=setTimeout(\"replace()\",3000);
-        \nhttp.open(\"GET\", \"current_question.php?ipalid=".$ipal->id."\", true);";
+    echo "\n\nfunction replace() {\nvar t=setTimeout(\"replace()\",3000)";
+    echo "\nhttp.open(\"GET\", \"current_question.php?ipalid=".$ipalid."\", true);";
     echo "\nhttp.onreadystatechange=function() {\nif(http.readyState == 4) {\n\nif(http.responseText != x && myCount > 1){\n";
     echo "window.location = window.location.href+'&x';\n";
     echo "}\nx=http.responseText;}\n}\nhttp.send(null);\nmyCount++;}\n\nreplace();\n</script>";
@@ -439,12 +415,20 @@ function ipal_java_questionupdate() {
 
 /**
  * Make the button controls on the instructor interface.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function instructor_buttons() {
+function instructor_buttons($ipalid) {
+    $mycmid = optional_param('id', '0', PARAM_INT);// The cmid of the IPAL instance.
+    if ($mycmid) {
+        $querystring = 'id='.$mycmid;
+    } else {
+        $querystring = '';
+    }
     $disabled = "";
-    $myform = "<form action=\"?".$_SERVER['QUERY_STRING']."\" method=\"post\">\n";
+    $myform = "<form action=\"?".$querystring."\" method=\"post\">\n";
     $myform .= "\n";
-    if (!ipal_check_active_question()) {
+    if (!ipal_check_active_question($ipalid)) {
         $disabled = "disabled=\"disabled\"";
     }
 
@@ -458,7 +442,14 @@ function instructor_buttons() {
  * @param string $newstate Gives the state to be displayed.
  */
 function ipal_toggle_view($newstate) {
-    $myform = "<form action=\"?".$_SERVER['QUERY_STRING']."\" method=\"post\">\n";
+    $mycmid = optional_param('id', '0', PARAM_INT);// The cmid of the IPAL instance.
+    if ($mycmid) {
+        $querystring = 'id='.$mycmid;
+    } else {
+        $querystring = '';
+    }
+
+    $myform = "<form action=\"?".$querystring."\" method=\"post\">\n";
     $myform .= "\n";
     $myform .= "<INPUT TYPE=hidden NAME=ipal_view VALUE=\"changeState\">";
     $myform .= "Change View to <input type=\"submit\" value=\"$newstate\" name=\"gridView\"/>\n</form>\n";
@@ -481,32 +472,35 @@ function ipal_show_compadre($cmid) {
 /**
  * This function puts all the elements together for the instructors interface.
  * This is the last stop before it is displayed.
- * @param int $cmid The ipal id for this ipal instance.
+ * @param int $cmid The id for the course module for this ipal instance.
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_display_instructor_interface($cmid) {
+function ipal_display_instructor_interface($cmid, $ipalid) {
     global $DB;
-    global $ipal;
-    global $cm;
     global $CFG;
 
-    if (isset($_POST['clearQuestion'])) {
-        ipal_clear_question();
+    $clearquestion = optional_param('clearQuestion', null, PARAM_TEXT);
+    $sendquestionid = optional_param('question', 0, PARAM_INT);
+    $ipalview = optional_param('ipal_view', '', PARAM_TEXT);// The output frm the button to change view of graph.
+
+    if (isset($clearquestion)) {
+        ipal_clear_question($ipalid);
     }
-    if (isset($_POST['question'])) {
-        ipal_send_question();
+    $state = $DB->get_record('ipal', array('id' => $ipalid));
+    if ($sendquestionid) {
+        ipal_send_question($ipalid, $state->mobile);
     }
 
-    $state = $DB->get_record('ipal', array('id' => $ipal->id));
     if (($state->preferredbehaviour <> "Grid") and ($state->preferredbehaviour <> "Graph")){// Preferredbehaviour not set.
-        $result = $DB->set_field('ipal', 'preferredbehaviour', 'Graph', array('id' => $ipal->id));
-        $state = $DB->get_record('ipal', array('id' => $ipal->id));
+        $result = $DB->set_field('ipal', 'preferredbehaviour', 'Graph', array('id' => $ipalid));
+        $state = $DB->get_record('ipal', array('id' => $ipalid));
     }
-    if ((isset($_POST['ipal_view'])) and ($_POST['ipal_view'] == "changeState")) {
+    if ((isset($ipalview)) and ($ipalview == "changeState")) {
         if ($state->preferredbehaviour == "Graph") {
-            $result = $DB->set_field('ipal', 'preferredbehaviour', 'Grid', array('id' => $ipal->id));
+            $result = $DB->set_field('ipal', 'preferredbehaviour', 'Grid', array('id' => $ipalid));
             $newstate = 'Histogram';
         } else {
-            $result = $DB->set_field('ipal', 'preferredbehaviour', 'Graph', array('id' => $ipal->id));
+            $result = $DB->set_field('ipal', 'preferredbehaviour', 'Graph', array('id' => $ipalid));
             $newstate = 'Spreadsheet';
         }
     } else {
@@ -516,16 +510,16 @@ function ipal_display_instructor_interface($cmid) {
             $newstate = 'Histogram';
         }
     }
-    if (($newstate == 'Histogram') and (ipal_get_qtype(ipal_show_current_question_id()) == 'essay')) {
+    if (($newstate == 'Histogram') and (ipal_get_qtype(ipal_show_current_question_id($ipalid)) == 'essay')) {
         $newstate = 'Responses';
     }
 
-    ipal_java_graphupdate();
-    echo "<table><tr><td>".instructor_buttons()."</td><td>".ipal_show_compadre($cmid)."</td><td>".
+    ipal_java_graphupdate($ipalid);
+    echo "<table><tr><td>".instructor_buttons($ipalid)."</td><td>".ipal_show_compadre($cmid)."</td><td>".
         ipal_toggle_view($newstate)."</td>";
-    if ($ipal->mobile) {
-        $timecreated = $ipal->timecreated;
-        $ac = $ipal->id.substr($timecreated, strlen($timecreated) - 2, 2);
+    if ($state->mobile) {
+        $timecreated = $state->timecreated;
+        $ac = $state->id.substr($timecreated, strlen($timecreated) - 2, 2);
         echo "<td>access code=$ac</td>";
     }
     echo "</tr></table>";
@@ -533,7 +527,7 @@ function ipal_display_instructor_interface($cmid) {
     echo "\n<script language=\"javascript\" type=\"text/javascript\">
     \n function ipalpopup(id) {
         \n\t url = ".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
-        echo $cm->id;
+        echo $cmid;
         echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
         echo "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
         echo "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
@@ -543,41 +537,43 @@ function ipal_display_instructor_interface($cmid) {
     \n }
     \n </script>\n";
 
-    echo  ipal_make_instructor_form();
+    echo  ipal_make_instructor_form($ipalid, $cmid);
     echo "<br><br>";
-    $state = $DB->get_record('ipal', array('id' => $ipal->id));
+    $state = $DB->get_record('ipal', array('id' => $ipalid));
     if ($state->preferredbehaviour == "Graph") {
-        if (ipal_show_current_question() == 1) {
+        if (ipal_show_current_question($ipalid) == 1) {
             echo "<br>";
             echo "<br>";
-            echo "<iframe id= \"graphIframe\" src=\"graphics.php?ipalid=".$ipal->id."\" height=\"535\" width=\"723\"></iframe>";
-            echo "<br><br><a onclick=\"newwindow=window.open('popupgraph.php?ipalid=".$ipal->id."', '',
+            echo "<iframe id= \"graphIframe\" src=\"graphics.php?ipalid=".$ipalid."\" height=\"535\" width=\"723\"></iframe>";
+            echo "<br><br><a onclick=\"newwindow=window.open('popupgraph.php?ipalid=".$ipalid."', '',
                     'width=620,height=450,toolbar=no,location=no,menubar=no,copyhistory=no,status=no,";
             echo "directories=no,scrollbars=yes,resizable=yes');
                     return false;\"
-                    href=\"popupgraph.php?ipalid=".$ipal->id."\" target=\"_blank\">Open a new window for the graph.</a>";
+                    href=\"popupgraph.php?ipalid=".$ipalid."\" target=\"_blank\">Open a new window for the graph.</a>";
         }
     } else {
         echo "<br>";
         echo "<br>";
-        echo "<iframe id= \"graphIframe\" src=\"gridview.php?id=".$ipal->id.
+        echo "<iframe id= \"graphIframe\" src=\"gridview.php?id=".$ipalid.
             "\" height=\"535\" width=\"723\"></iframe>";
-        echo "<br><br><a onclick=\"window.open('popupgraph.php?ipalid=".$ipal->id."', '',
+        echo "<br><br><a onclick=\"window.open('popupgraph.php?ipalid=".$ipalid."', '',
                 'width=620,height=450,toolbar=no,location=no,menubar=no,copyhistory=no,status=no,
                 directories=no,scrollbars=yes,resizable=yes');
                 return false;\"
-                href=\"popupgraph.php?ipalid=".$ipal->id."\" target=\"_blank\">Open a new window for the graph.</a>";
+                href=\"popupgraph.php?ipalid=".$ipalid."\" target=\"_blank\">Open a new window for the graph.</a>";
     }
 }
 
 /**
  * This function finds the current question that is active for the ipal that it was requested from.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_show_current_question() {
+function ipal_show_current_question($ipalid) {
     global $DB;
-    global $ipal;
-    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
-        $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipal->id));
+
+    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
+        $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
         $questiontext = $DB->get_record('question', array('id' => $question->question_id));
         // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
         $questiontext->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $questiontext->questiontext);
@@ -591,11 +587,13 @@ function ipal_show_current_question() {
 
 /**
  * The function finds out is there a question active?
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_check_active_question() {
+function ipal_check_active_question($ipalid) {
     global $DB;
-    global $ipal;
-    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
+
+    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
         return(1);
     } else {
         return(0);
@@ -605,12 +603,14 @@ function ipal_check_active_question() {
 
 /**
  * This function finds the current question that is active for the ipal that it was requested from.
+ *
+ * @param int $ipalid The id of this ipal instance.
  */
-function ipal_show_current_question_id() {
+function ipal_show_current_question_id($ipalid) {
     global $DB;
-    global $ipal;
-    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
-        $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipal->id));
+
+    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
+        $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
         return($question->question_id);
     } else {
         return(0);
@@ -634,13 +634,16 @@ function ipal_get_qtype($questionid) {
 
 /**
  * This is the function that makes the form for the student to answer from.
+ *
+ * @param obj $ipal The object with information about this ipal instance.
  */
-function ipal_make_student_form() {
-    global $ipal;
+function ipal_make_student_form($ipal) {
     global $DB;
     global $CFG;
     global $USER;
-    global $course;
+
+    $mycmid = optional_param('id', 0, PARAM_INT);// The cmid for the IPAL instance.
+
     $disabled = '';
 
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
@@ -649,7 +652,7 @@ function ipal_make_student_form() {
         $qid = $question->question_id;
         $myformarray = ipal_get_questions_student($qid);
         echo "<br><br><br>";
-        echo "<form action=\"?id=".$_GET['id']."\" method=\"post\">\n";
+        echo "<form action=\"?id=".$mycmid."\" method=\"post\">\n";
         $courseid = $ipal->course;
         $contextid = $DB->get_record('context', array('instanceid' => $courseid, 'contextlevel' => 50));
         // Put entry in question_usages table.
@@ -675,22 +678,24 @@ function ipal_make_student_form() {
         }
         echo "<INPUT TYPE=hidden NAME=question_id VALUE=\"".$myformarray[0]['id']."\">";
         echo "<INPUT TYPE=hidden NAME=active_question_id VALUE=\"$question->id\">";
-        echo "<INPUT TYPE=hidden NAME=course_id VALUE=\"$course->id\">";
+        echo "<INPUT TYPE=hidden NAME=course_id VALUE=\"$courseid\">";
         echo "<INPUT TYPE=hidden NAME=user_id VALUE=\"$USER->id\">";
         echo "<INPUT TYPE=submit NAME=submit VALUE=\"Submit\" ".$disabled.">";
         echo "<INPUT TYPE=hidden NAME=ipal_id VALUE=\"$ipal->id\">";
-        echo "<INPUT TYPE=hidden NAME=instructor VALUE=\"".findinstructor($course->id)."\">";
+        echo "<INPUT TYPE=hidden NAME=instructor VALUE=\"".findinstructor($courseid)."\">";
         echo "</form>";
     } else {
         echo "<table width='450'><tr><td>No Current Question.</td>";
         if ($ipal->mobile > 1) {
+            // We plan to enable the use of commercial clickers, with $ipal->mobile > 1, in a future version of IPAL.
+            // This part of the if statement is designed for such a future version.
             if ($mobile = $DB->get_record('ipal_mobile', array('user_id' => $USER->id, 'course_id' => $ipal->course))) {
                 $mobilemessage = "Update clicker registration";
             } else {
                 $mobilemessage = "Register clicker";
             }
             echo "<td align='right'>";
-            echo "<a href='ipal_register_clicker.php?cmid=".$_GET['id']."&ipal_id=".$ipal->id."'>$mobilemessage</a>";
+            echo "<a href='ipal_register_clicker.php?cmid=".$mycmid."&ipal_id=".$ipal->id."'>$mobilemessage</a>";
             echo "</td>";
         }
         echo "</tr></table>";
@@ -700,7 +705,7 @@ function ipal_make_student_form() {
 /**
  * function to return the encripted hash for an instructor.
  * This is used when sending sanatized data to CmPADRE.
- * @param int $cnum Teh course id
+ * @param int $cnum The course id
  */
 function findinstructor($cnum) {
     global $DB;
@@ -730,22 +735,29 @@ function findinstructor($cnum) {
  * @param int $instructor The id of the teacher.
  */
 function ipal_save_student_response($questionid, $answerid, $activequestionid, $atext, $instructor) {
-    global $ipal;
     global $DB;
     global $CFG;
     global $USER;
-    global $course;
 
+    // Obtaining ipal id.
+    if ($activequestionid > 0) {
+        if ($activequestion = $DB->get_record('ipal_active_questions', array('id' => $activequestionid))) {
+            $ipalid = $activequestion->ipal_id;
+            $course = $DB->get_record('course', array('id' => $activequestion->course));
+        } else {
+            return(0); // Probably a new question has been sent.
+        }
+    }
     // Create insert for archive.
     $recordarc = new stdClass();
     $recordarc->id = '';
     $recordarc->user_id = $USER->id;
     $recordarc->question_id = $questionid;
-    $recordarc->quiz_id = $ipal->id;
+    $recordarc->quiz_id = $ipalid;
     $recordarc->answer_id = $answerid;
     $recordarc->a_text = $atext;
     $recordarc->class_id = $course->id;
-    $recordarc->ipal_id = $ipal->id;
+    $recordarc->ipal_id = $ipalid;
     $recordarc->ipal_code = $activequestionid;
     $recordarc->shortname = $course->shortname;
     $recordarc->instructor = $instructor;
@@ -758,17 +770,17 @@ function ipal_save_student_response($questionid, $answerid, $activequestionid, $
     $record->id = '';
     $record->user_id = $USER->id;
     $record->question_id = $questionid;
-    $record->quiz_id = $ipal->id;
+    $record->quiz_id = $ipalid;
     $record->answer_id = $answerid;
     $record->a_text = $atext;
     $record->class_id = $course->id;
-    $record->ipal_id = $ipal->id;
+    $record->ipal_id = $ipalid;
     $record->ipal_code = $activequestionid;
     $record->time_created = time();
 
-    if ($DB->record_exists('ipal_answered', array('user_id' => $USER->id, 'question_id' => $questionid, 'ipal_id' => $ipal->id ))) {
+    if ($DB->record_exists('ipal_answered', array('user_id' => $USER->id, 'question_id' => $questionid, 'ipal_id' => $ipalid ))) {
         $mybool = $DB->delete_records('ipal_answered', array('user_id' => $USER->id,
-            'question_id' => $questionid, 'ipal_id' => $ipal->id ));
+            'question_id' => $questionid, 'ipal_id' => $ipalid ));
     }
     $lastinsertid = $DB->insert_record('ipal_answered', $record);
 }
@@ -776,34 +788,46 @@ function ipal_save_student_response($questionid, $answerid, $activequestionid, $
 /**
  * This is the function that puts the student interface together.
  * It is the last stop before the display.
+ * @param int $ipalid The id of the ipal instance.
  */
-function ipal_display_student_interface() {
+function ipal_display_student_interface($ipalid) {
     global $DB;
-    ipal_java_questionupdate();
+
+    $ipal = $DB->get_record('ipal', array('id' => $ipalid));
+    $answerid = optional_param('answer_id', 0, PARAM_INT);
+    $atext = optional_param('a_text', '', PARAM_RAW_TRIMMED);
+    $questionid = optional_param('question_id', 0, PARAM_INT);
+    $activequestionid = optional_param('active_question_id', 0, PARAM_INT);
+    $instructor = optional_param('instructor', 0, PARAM_ALPHANUM);
+
+    ipal_java_questionupdate($ipalid);
     $priorresponse = '';
-    if (isset($_POST['answer_id'])) {
-        if ($_POST['answer_id'] == '-1') {
-            $priorresponse = "\n<br />Last answer you submitted: ".strip_tags($_POST['a_text']);
+
+    if (isset($answerid) and ($answerid <> 0)) {
+        if ($answerid == '-1') {
+            $priorresponse = "\n<br />Last answer you submitted: ".strip_tags($atext);
         } else {
-            $answerid = $_POST['answer_id'];
+            $answerid = $answerid;
             $answer = $DB->get_record('question_answers', array('id' => $answerid));
             $priorresponse = "\n<br />Last answer you submitted: ".strip_tags($answer->answer);
         }
-        ipal_save_student_response($_POST['question_id'], $_POST['answer_id'], $_POST['active_question_id'],
-            $_POST['a_text'], $_POST['instructor']);
+        ipal_save_student_response($questionid, $answerid, $activequestionid,
+            $atext, $instructor);
     }
     // Print the anonymous message and prior response.
     echo $priorresponse;
 
     // Print the question.
-    ipal_make_student_form();
+    ipal_make_student_form($ipal);
 }
 
 /**
- * Print a message to tell users whether the form is anonymous or non-anonymous
+ * Print a message to tell users whether the form is anonymous or non-anonymous.
+ *
+ * @param obj $ipal The object with information about this ipal instance.
  */
-function ipal_print_anonymous_message() {
-    global $ipal;
+function ipal_print_anonymous_message($ipal) {
+
     if ($ipal->anonymous) {
         echo get_string('anonymousmess', 'ipal');
     } else {
@@ -828,44 +852,39 @@ function ipal_check_answered($ipalid) {
 }
 
 /**
- * Return the passcode for the ipal
- * @return int passcode
- */
-function ipal_get_passcode() {
-    global $ipal;
-    global $DB;
-    return $ipal->id * 100 + fmod($ipal->timecreated, 100);
-}
-
-/**
  * Display question in tempview.php, modified so that
  * its html can be easily parsed to the android application.
  *
- * @param id $userid
- * @param string $passcode
- * @param string $username
+ * @param int $userid The id for this user.
+ * @param string $passcode The pass code to access the ipal instance.
+ * @param string $username The username for the student.
+ * @param int $ipalid The id for this ipal instance.
  */
-function ipal_tempview_display_question($userid, $passcode, $username) {
+function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) {
     global $DB;
-    global $ipal;
     global $CFG;
     global $USER;
-    global $course;
 
-    ipal_java_questionupdate();
+    $answerid = optional_param('answer_id', 0, PARAM_INT);
+    $atext = optional_param('a_text', '', PARAM_RAW_TRIMMED);
+    $questionid = optional_param('question_id', 0, PARAM_INT);
+    $activequestionid = optional_param('active_question_id', 0, PARAM_INT);
+    $instructor = optional_param('instructor', 0, PARAM_ALPHANUM);
+
+    ipal_java_questionupdate($ipalid);
     $priorresponse = '';
-    if (isset($_POST['answer_id'])) {
 
-        if ($_POST['answer_id'] == '-1') {
-            $priorresponse = "\n<br />Last answer you submitted:".strip_tags($_POST['a_text']);
+    if ($answerid <> 0) {
+        if ($answerid == '-1') {
+            $priorresponse = "\n<br />Last answer you submitted:".strip_tags($atext);
         } else {
-            $answerid = $_POST['answer_id'];
+            $answerid = $answerid;
             $answer = $DB->get_record('question_answers', array('id' => $answerid));
             $priorresponse = "\n<br />Last answer you submitted: ".strip_tags($answer->answer);
         }
         // Save student response.
-        ipal_tempview_save_response($_POST['question_id'], $_POST['answer_id'],
-            $_POST['active_question_id'], $_POST['a_text'], $_POST['instructor'], $userid);
+        ipal_tempview_save_response($questionid, $answerid,
+            $activequestionid, $atext, $instructor, $userid);
 
     }
     // Print the anonymous message and prior response.
@@ -873,9 +892,10 @@ function ipal_tempview_display_question($userid, $passcode, $username) {
 
     $disabled = '';
 
-    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
-        $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipal->id));
+    if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
+        $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
         $questionid = $question->question_id;
+        $courseid = $question->course;
         $myformarray = ipal_get_questions_student($questionid);
         echo "<br><br><br><br>";
         echo "<p id=\"questiontype\">".ipal_get_qtype($questionid)."<p>";
@@ -906,11 +926,11 @@ function ipal_tempview_display_question($userid, $passcode, $username) {
         // Hidden inputs.
         echo "<INPUT TYPE=hidden NAME=question_id VALUE=\"".$myformarray[0]['id']."\">";
         echo "<INPUT TYPE=hidden NAME=active_question_id VALUE=\"$question->id\">";
-        echo "<INPUT TYPE=hidden NAME=course_id VALUE=\"$course->id\">";
+        echo "<INPUT TYPE=hidden NAME=course_id VALUE=\"$courseid\">";
         echo "<INPUT TYPE=hidden NAME=user_id VALUE=\"$userid\">";
         echo "<INPUT TYPE=submit NAME=submit VALUE=\"Submit\" ".$disabled.">";
-        echo "<INPUT TYPE=hidden NAME=ipal_id VALUE=\"$ipal->id\">";
-        echo "<INPUT TYPE=hidden NAME=instructor VALUE=\"".findinstructor($course->id)."\">";
+        echo "<INPUT TYPE=hidden NAME=ipal_id VALUE=\"$ipalid\">";
+        echo "<INPUT TYPE=hidden NAME=instructor VALUE=\"".findinstructor($courseid)."\">";
         echo "\n</fieldset>";
         echo "</form>\n";
     } else {
@@ -931,22 +951,29 @@ function ipal_tempview_display_question($userid, $passcode, $username) {
  * @param int $userid
  */
 function ipal_tempview_save_response($questionid, $answerid, $activequestionid, $atext, $instructor, $userid) {
-    global $ipal;
     global $DB;
     global $CFG;
     global $USER;
-    global $course;
 
+    // Obtaining ipal id.
+    if ($activequestionid > 0) {
+        if ($activequestion = $DB->get_record('ipal_active_questions', array('id' => $activequestionid))) {
+            $ipalid = $activequestion->ipal_id;
+            $course = $DB->get_record('course', array('id' => $activequestion->course));
+        } else {
+            return(0); // Probably a new question has been sent.
+        }
+    }
     // Create insert for archive.
     $recordarc = new stdClass();
     $recordarc->id = '';
     $recordarc->user_id = $userid;
     $recordarc->question_id = $questionid;
-    $recordarc->quiz_id = $ipal->id;
+    $recordarc->quiz_id = $ipalid;
     $recordarc->answer_id = $answerid;
     $recordarc->a_text = $atext;
     $recordarc->class_id = $course->id;
-    $recordarc->ipal_id = $ipal->id;
+    $recordarc->ipal_id = $ipalid;
     $recordarc->ipal_code = $activequestionid;
     $recordarc->shortname = $course->shortname;
     $recordarc->instructor = $instructor;
@@ -959,17 +986,17 @@ function ipal_tempview_save_response($questionid, $answerid, $activequestionid, 
     $record->id = '';
     $record->user_id = $userid;
     $record->question_id = $questionid;
-    $record->quiz_id = $ipal->id;
+    $record->quiz_id = $ipalid;
     $record->answer_id = $answerid;
     $record->a_text = $atext;
     $record->class_id = $course->id;
-    $record->ipal_id = $ipal->id;
+    $record->ipal_id = $ipalid;
     $record->ipal_code = $activequestionid;
     $record->time_created = time();
 
-    if ($DB->record_exists('ipal_answered', array('user_id' => $userid, 'question_id' => $questionid, 'ipal_id' => $ipal->id ))) {
+    if ($DB->record_exists('ipal_answered', array('user_id' => $userid, 'question_id' => $questionid, 'ipal_id' => $ipalid ))) {
         $mybool = $DB->delete_records('ipal_answered', array('user_id' => $userid, 'question_id' => $questionid,
-        'ipal_id' => $ipal->id ));
+        'ipal_id' => $ipalid ));
     }
     $lastinsertid = $DB->insert_record('ipal_answered', $record);
 }
@@ -978,11 +1005,10 @@ function ipal_tempview_save_response($questionid, $answerid, $activequestionid, 
  * Send a message to IPAL Android Application to signal refreshing questions.
  * Only send to the students in the class with a valid registrationId
  *
+ * @param obj $course The object with information about the course.
  */
-function ipal_send_message_to_device() {
-    global $ipal;
+function ipal_send_message_to_device($course) {
     global $DB;
-    global $course;
 
     // Replace with real BROWSER API key from Google APIs.
     $apikey = "AIzaSyARBhzl2L5MCV4-_rZNH6nz4xGHvhXpW2E";

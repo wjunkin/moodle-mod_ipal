@@ -21,14 +21,16 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+require_capability('mod/quiz:manage', $contexts->lowest());
 $compadreurl = 'http://www.compadre.org/ipal/';
-$compadrexmlurl = $compadreurl.$_POST['xmlurl'];
+$xmlurl = required_param('xmlurl', PARAM_URL);
+$compadrexmlurl = $compadreurl.$xmlurl;
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $compadrexmlurl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 $contents = curl_exec($ch);
 curl_close($ch);
-$categoryid = $_POST['categoryid'];
+$categoryid = required_param('categoryid', PARAM_INT);
 $lenxml = strlen($contents);// The is the length of the questions in XMLencode form.
 
 $xmldata = $contents;// Thie is the questions in rawurldecode($questionXMLencode).
