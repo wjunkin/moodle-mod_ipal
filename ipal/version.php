@@ -28,9 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$module->version  = 2015030400;  // The current module version (Date: YYYYMMDDXX).
-$module->requires = 2014101500;  // Requires this Moodle version.
-$module->cron     = 60;           // Period for cron to check this module (secs).
+$plugin->version  = 2015030401;  // The current module version (Date: YYYYMMDDXX).
+$plugin->requires = 2014101500;  // Requires this Moodle version.
+$plugin->cron     = 60;           // Period for cron to check this module (secs).
 $plugin->component = 'mod_ipal';      // To check on upgrade, that module sits in correct place.
 $plugin->maturity = MATURITY_STABLE;
-$module->release = '2.0.8 (Build: 2015030400';
+$plugin->release = '2.0.8 (Build: 2015030401';
