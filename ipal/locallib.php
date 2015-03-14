@@ -704,20 +704,20 @@ function ipal_make_student_form($ipal) {
 
 /**
  * function to return the encripted hash for an instructor.
- * This is used when sending sanatized data to CmPADRE.
+ * This is used when sending sanatized data to ComPADRE.
  * @param int $cnum The course id
  */
 function findinstructor($cnum) {
     global $DB;
     global $CFG;
 
-    $query = "SELECT u.id FROM ".$CFG->prefix."user u, ".$CFG->prefix."role_assignments r, ".$CFG->prefix.
-            "context cx, ".$CFG->prefix."course c, ".$CFG->prefix."role ro
+    $query = "SELECT u.id FROM {user} u, {role_assignments} r,
+            {context} cx, {course} c, {role} ro
             WHERE u.id = r.userid AND r.contextid = cx.id AND cx.instanceid = c.id AND
             ro.shortname='editingteacher' AND r.roleid =ro.id AND
-            c.id = ".$cnum." AND cx.contextlevel =50";
-
-    $result = $DB->get_record_sql($query);
+            c.id = ? AND cx.contextlevel =50";
+    // The variable $cnum is the id number for the course in the course table.
+    $result = $DB->get_record_sql($query, array($cnum));
     if (!$result) {
         return('none');
     } else {

@@ -172,12 +172,12 @@ function ipal_transfer_archive() {
 
     if ($DB->record_exists('ipal_answered_archive', array('sent' => '1'))) {
         $drecords = $DB->get_records('ipal_answered_archive', array('sent' => '1'));
-
-        $version = $DB->get_record('modules', array('name' => 'ipal'));
+        // In Moodle 2.6 the version value is no lnger in the modules table.
+        $version = $DB->get_record('config_plugins', array('plugin' => 'mod_ipal', 'name' => 'version'));
         $xmlheader = "<?xml version=\"1.0\" standalone=\"yes\"?>\n<ipal>\n<head>\n";
         $xmlheader .= "<host>".$CFG->wwwroot."</host>\n";
         $xmlheader .= "<moodle_version>".$CFG->release."</moodle_version>\n";
-        $xmlheader .= "<ipal_version>".$version->version."</ipal_version>\n";
+        $xmlheader .= "<ipal_version>".$version->value."</ipal_version>\n";
         $xmlheader .= "<rosters>\n";
         $question = '';
         foreach ($drecords as $record) {
@@ -191,7 +191,11 @@ function ipal_transfer_archive() {
             $question .= "<ipal_id>".$record->quiz_id."</ipal_id>\n";
             $question .= "<answer_id>".$record->answer_id."</answer_id>\n";
             $aversion = $DB->get_record('question_answers', array('id' => $record->answer_id));
-            $question .= "<answer_hash>".md5($aversion->answer)."</answer_hash>\n";
+            $aversionanswer = '';
+            if (isset($aversion->answer)) {
+                $aversionanswer = $aversion->answer;
+            }
+            $question .= "<answer_hash>".md5($aversionanswer)."</answer_hash>\n";
             $question .= "<class_id>".$record->class_id."</class_id>\n";
             $courseroster[$record->class_id] = 1;
             $courseinstructor[$record->class_id] = $record->instructor;
@@ -213,8 +217,8 @@ function ipal_transfer_archive() {
             $courseid = $key;
             // The int $courseid is the id for this course and the $studentroleid is the student role integer (default=5).
             $query = "SELECT ra.userid FROM {role_assignments} ra, {context} cx
-                WHERE ra.contextid = cx.id AND cx.instanceid = $courseid AND ra.roleid = $studentroleid AND cx.contextlevel = 50";
-            $studentids = $DB->get_records_sql($query);
+                WHERE ra.contextid = cx.id AND cx.instanceid = ? AND ra.roleid = ? AND cx.contextlevel = 50";
+            $studentids = $DB->get_records_sql($query, array($courseid, $studentroleid));
             foreach ($studentids as $key => $value) {
                 $studentid[] = $value->userid;
             }
