@@ -28,7 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin = new stdClass;
+if (!isset($plugin)){
+    $plugin = new stdClass;
+}
 $plugin->version  = 2015031400;  // The current module version (Date: YYYYMMDDXX).
 $plugin->requires = 2014101500;  // Requires this Moodle version.
 $plugin->cron     = 60;           // Period for cron to check this module (secs).
