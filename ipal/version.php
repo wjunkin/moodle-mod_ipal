@@ -28,7 +28,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (!isset($plugin)){
+if (!isset($plugin)) {
     $plugin = new stdClass;
 }
 $plugin->version  = 2015031400;  // The current module version (Date: YYYYMMDDXX).
