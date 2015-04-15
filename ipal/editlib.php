@@ -247,6 +247,14 @@ function ipal_move_question_down($layout, $questionid) {
     return _ipal_move_question($layout, $questionid, + 1);
 }
 
+// Parent class for the below, inheriting from either namespaced class (2.8+) or old flat class (2.7).
+if (class_exists('mod_quiz\question\bank\custom_view')) {
+    class ipal_question_bank_view_parent extends mod_quiz\question\bank\custom_view {}
+} else {
+    require_once($CFG->dirroot . '/mod/quiz/editlib.php');
+    class ipal_question_bank_view_parent extends quiz_question_bank_view {}
+}
+
 /**
  * Subclass to customise the view of the question bank for the quiz editing screen.
  *
@@ -254,7 +262,7 @@ function ipal_move_question_down($layout, $questionid) {
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class ipal_question_bank_view extends mod_quiz\question\bank\custom_view {
+class ipal_question_bank_view extends ipal_question_bank_view_parent {
     /** @var bool the quizhas attempts. */
     protected $quizhasattempts = false;
     /** @var object the quiz settings. */
@@ -263,7 +271,7 @@ class ipal_question_bank_view extends mod_quiz\question\bank\custom_view {
     /**
      * Function to provide the correct URL for use in IPAL.
      * This provides the cahnge needed to use the class quiz_question_bank_view in IPAL.
-     * 
+     *
      * @param int $questionid The id of the question.
      * @return object the correct url for IPAL.
      */
@@ -273,6 +281,26 @@ class ipal_question_bank_view extends mod_quiz\question\bank\custom_view {
         $params['addquestion'] = $questionid;
         $params['sesskey'] = sesskey();
         return new moodle_url('/mod/ipal/edit.php', $params);
+    }
+
+    // We need to pass through the IPAL edit URL to ensure that everything works.
+    protected function display_options_form($showquestiontext, $scriptpath = '/mod/ipal/edit.php',
+            $showtextoption = false) {
+        // Overridden just to change the default values of the arguments.
+        parent::display_options_form($showquestiontext, $scriptpath, $showtextoption);
+    }
+
+    // The custom_view class overrides this with an empty function.  We want it back.
+    protected function create_new_question_form($category, $canadd) {
+        global $CFG;
+        echo '<div class="createnewquestion">';
+        if ($canadd) {
+            create_new_question_button($category->id, $this->editquestionurl->params(),
+                    get_string('createnewquestion', 'question'));
+        } else {
+            print_string('nopermissionadd', 'question');
+        }
+        echo '</div>';
     }
 
 }

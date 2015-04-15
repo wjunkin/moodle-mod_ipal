@@ -1,0 +1,64 @@
+#page-mod-ipal-edit .questionbankwindow.block {
+    float: right;
+    width: 30%;
+    right: 0.3em;
+    padding-bottom: 0.5em;
+    display: block;
+    border-width: 0;
+}
+#page-mod-ipal-edit .questionbankwindow.block .content {
+    padding: 10px 5px;
+}
+#page-mod-ipal-edit .questionbankwindow .choosecategory,
+#page-mod-ipal-edit .questionbankwindow .createnewquestion {
+    padding: 0.3em;
+}
+#page-mod-ipal-edit .questionbankwindow .createnewquestion .singlebutton {
+    display: inline;
+}
+#page-mod-ipal-edit .questionbankwindow #catmenu_jump {
+    display: block;
+}
+
+#page-mod-ipal-edit .questionbankwindow.block th.questionnametext {
+    overflow:hidden;
+}
+
+#page-mod-ipal-edit .questionbankwindow select#catmenu_jump {
+/* In Opera9, IE6 the width of the
+select obeys the width of its content
+by default. This prevents that. */width: 100%;
+}
+
+/*this color might need to be theme-specific,
+but in terms of usability, as testing showed,
+http: //docs.moodle.org/dev/Quiz_UI_redesign/usability_testing_of_August_2008/Issues#Question_bank_.2F_question_adding_controls_visibility
+it must be ensured that the question
+bank window's title is prominent enough*/
+#page-mod-ipal-edit .questionbankwindow.block div.header {
+    background-color: #009;
+    background-image: none;
+    padding-top: 0.2em;
+    font-weight: bold;
+    border: 0 none;
+}
+#page-mod-ipal-edit .questionbankwindow.block div.header div.title h2 {
+    color: #FFF;
+    text-align: center;
+}
+#page-mod-ipal-edit .questionbankwindow.block div.bd > h2 {
+    display: none; /* Hide "Question bank" heading within block content. */
+}
+
+#page-mod-ipal-edit .questionbankwindow .createnewquestion select,
+#page-mod-ipal-edit .questionbankwindow #catmenu select,
+#page-mod-ipal-edit .questionbankwindow #menucategory {
+    width: 100%;
+}
+#page-mod-ipal-edit .questionbankwindow .modulespecificbuttonscontainer {
+    padding-top: 10px;
+}
+
+#page-mod-ipal-edit.dir-rtl .questionbankwindow.block {
+    float: left;
+}
