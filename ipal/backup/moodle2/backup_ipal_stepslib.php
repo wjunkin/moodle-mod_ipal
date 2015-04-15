@@ -79,7 +79,7 @@ class backup_ipal_activity_structure_step extends backup_activity_structure_step
 
             $answeredarchiveelement->set_source_sql('
                 SELECT *
-                    FROM {ipal_answeredarchive}
+                    FROM {ipal_answered_archive}
                     WHERE ipal_id = ?',
                 array(backup::VAR_ACTIVITYID));
 
