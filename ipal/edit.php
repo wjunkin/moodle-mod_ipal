@@ -230,7 +230,10 @@ echo '<div class="header"><div class="title">';
 echo "<h2>Add Questions</h2>";
 echo "</div></div>";
 echo '<div class="content"><div class="box generalbox questionbank">';
-require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
+if (!empty(get_config('mod_ipal', 'enable_compadre'))) {
+    // Include the ComPADRE question import form if enabled.
+    require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
+}
 if ($DB->count_records('modules', array('name' => 'ejsapp'))) {
     echo "\nClick <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid'>
         to add EJS Apps</a>";

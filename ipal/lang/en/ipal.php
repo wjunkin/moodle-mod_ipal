@@ -85,3 +85,9 @@ $string['ipal_analytics_help'] = 'If this is selected the student polling data, 
      Only authorized people at your institution can access the data and identify the user names or actual names of any student.
      and these authorized people can only view the results of the analysis for their own school.
      <br />If this is not selected, no data is sent to the ComPADRE site.';
+
+$string['ipal_enable_compadre'] = 'Enable retrieval of questions from ComPADRE';
+$string['ipal_enable_compadre_help'] = 'If this is selected, the teacher can choose to import ready-to-use peer-reviewed questions.
+	 The initial set of questions includes hundreds of introductory physics questions from the ConcepTest questions, authored
+	 by Physics Professor Eric Mazur and his group from Harvard University. These questions are housed at <a href="http://www.compadre.org/" target="_blank">ComPADRE</a>, a National
+	 Physics and Astronomy Digital Library.';

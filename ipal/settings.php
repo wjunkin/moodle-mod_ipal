@@ -38,3 +38,10 @@ $settings->add(new admin_setting_configcheckbox('ipal_analytics',
                                                 $name,
                                                 $description,
                                                 1));
+
+$name = new lang_string('ipal_enable_compadre', 'mod_ipal');
+$description = new lang_string('ipal_enable_compadre_help', 'mod_ipal');
+$settings->add(new admin_setting_configcheckbox('mod_ipal/enable_compadre',
+                                                $name,
+                                                $description,
+                                                1));
