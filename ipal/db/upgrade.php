@@ -108,6 +108,17 @@ function xmldb_ipal_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2012081611, 'ipal');
     }
 
+    if ($oldversion < 2015041501) {
+        // Set renamed analytics config based on old one, if present.
+        $oldconfig = $DB->get_record('config', array('name'=>'ipal_analytics'));
+        if ($oldconfig !== false) {
+            set_config('analytics', $oldconfig->value, 'mod_ipal');
+        }
+
+        // Ipal savepoint reached.
+        upgrade_mod_savepoint(true, 2015041501, 'ipal');
+    }
+
     // Final return of upgrade result (true, all went good) to Moodle.
     return true;
 }
