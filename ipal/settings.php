@@ -45,3 +45,10 @@ $settings->add(new admin_setting_configcheckbox('mod_ipal/enable_compadre',
                                                 $name,
                                                 $description,
                                                 1));
+
+$name = new lang_string('ipal_autocreate_generic', 'mod_ipal');
+$description = new lang_string('ipal_autocreate_generic_help', 'mod_ipal');
+$settings->add(new admin_setting_configcheckbox('mod_ipal/autocreate_generic',
+                                                $name,
+                                                $description,
+                                                1));

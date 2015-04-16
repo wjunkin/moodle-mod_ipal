@@ -225,7 +225,9 @@ $condition = new mod_ipal\bank\search\condition_unused($quiz);
 $questionbank->add_searchcondition($condition);
 
 echo '<div class="questionbankwindow block">';
-ipal_create_genericq($quiz->course);
+if (!empty(get_config('mod_ipal', 'autocreate_generic'))) {
+    ipal_create_genericq($quiz->course);
+}
 echo '<div class="header"><div class="title">';
 echo "<h2>Add Questions</h2>";
 echo "</div></div>";

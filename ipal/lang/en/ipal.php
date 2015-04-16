@@ -91,3 +91,7 @@ $string['ipal_enable_compadre_help'] = 'If this is selected, the teacher can cho
 	 The initial set of questions includes hundreds of introductory physics questions from the ConcepTest questions, authored
 	 by Physics Professor Eric Mazur and his group from Harvard University. These questions are housed at <a href="http://www.compadre.org/" target="_blank">ComPADRE</a>, a National
 	 Physics and Astronomy Digital Library.';
+
+$string['ipal_autocreate_generic'] = 'Auto-create generic questions';
+$string['ipal_autocreate_generic_help'] = 'If this is selected, generic multichoice and essay questions will be automatically created when the teacher first chooses to select
+	 the questions for an IPAL instance.';
