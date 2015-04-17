@@ -155,7 +155,12 @@ function ipal_print_recent_activity($course, $viewfullnames, $timestart) {
  */
 function ipal_cron() {
     mtrace( "Running ipal Cron..." );
-    ipal_transfer_archive();
+    if (!empty(get_config('mod_ipal', 'analytics'))) {
+        mtrace('  Sending data to ComPADRE:');
+        ipal_transfer_archive();
+    } else {
+        mtrace('  Not sending data to ComPADRE - anaytics disabled.');
+    }
     mtrace( "Ipal Done...." );
     return true;
 }
@@ -250,7 +255,7 @@ function ipal_update_code($ids) {
 
 /**
  * Send sanitized polling data to ComPADRE.
- * 
+ *
  * @param string $xml The xml file of the data
  */
 function ipal_post_xml($xml) {
@@ -318,8 +323,8 @@ function ipal_scale_used_anywhere($scaleid) {
 /**
  * Function to correct for changes from Moodle 2.2 to later versions.
  *
- * Since the /lib/questionlib.php script doesn't get the file name correct for the function 
- * (line about 1829) for Moodle 2.2 (and possibly other versions) this function corrects 
+ * Since the /lib/questionlib.php script doesn't get the file name correct for the function
+ * (line about 1829) for Moodle 2.2 (and possibly other versions) this function corrects
  * for having mod_ in front of the function name.
  * @param stdClass $course course settings object
  * @param stdClass $context context object
@@ -341,8 +346,8 @@ function mod_ipal_question_pluginfile($course, $context, $component, $filearea, 
  * Called via pluginfile.php -> question_pluginfile to serve files belonging to
  * a question in a question_attempt when that attempt is a quiz attempt.
  *
- * This function was taken straight from mod_quiz, Moodle verson 2.3 
- * It ws added to /ipal/lib.php to enable images to be used in question text 
+ * This function was taken straight from mod_quiz, Moodle verson 2.3
+ * It ws added to /ipal/lib.php to enable images to be used in question text
  * @param stdClass $course course settings object
  * @param stdClass $context context object
  * @param string $component the name of the component we are serving files for.
