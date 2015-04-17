@@ -68,7 +68,7 @@ function ipal_create_genericq($courseid) {
         }
     }
     if (!($categoryid > 0)) {
-        echo "\n<br />Error obtaining categoryid\n<br />";
+        debugging('Error obtaining category id for default question category.');
         return false;
     }
     $qmultichoicecheckid = $DB->count_records('question', array('category' => "$categoryid",
@@ -121,7 +121,7 @@ function ipal_create_genericq($courseid) {
         $answeraieldarray = array('answer', 'answerformat', 'fraction', 'feedback', 'feedbackformat');
         $answernotnullarray = array('answer', 'feedback');
         if (!($lastinsertid > 0)) {
-            echo "\n<br />Error creating Generic multichoice question\n<br />";
+            debugging('Error creating Generic multichoice question.');
             return false;
         }
         for ($n = 1; $n < 9; $n++) {
@@ -134,7 +134,7 @@ function ipal_create_genericq($courseid) {
             $answerinsert->feedbackformat = 1;
             $lastanswerinsertid[$n] = $DB->insert_record('question_answers', $answerinsert);
             if (!($lastanswerinsertid[$n] > 0)) {
-                echo "\n<br />Error inserting answer $n for Generic multichoice question (1-8)\n<br />";
+                debugging("Error inserting answer $n for Generic multichoice question (1-8)");
                 return false;
             }
         }
