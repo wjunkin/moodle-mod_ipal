@@ -34,7 +34,21 @@ defined('MOODLE_INTERNAL') || die;
 
 $name = new lang_string('ipal_analytics', 'mod_ipal');
 $description = new lang_string('ipal_analytics_help', 'mod_ipal');
-$settings->add(new admin_setting_configcheckbox('ipal_analytics',
+$settings->add(new admin_setting_configcheckbox('mod_ipal/analytics',
+                                                $name,
+                                                $description,
+                                                1));
+
+$name = new lang_string('ipal_enable_compadre', 'mod_ipal');
+$description = new lang_string('ipal_enable_compadre_help', 'mod_ipal');
+$settings->add(new admin_setting_configcheckbox('mod_ipal/enable_compadre',
+                                                $name,
+                                                $description,
+                                                1));
+
+$name = new lang_string('ipal_autocreate_generic', 'mod_ipal');
+$description = new lang_string('ipal_autocreate_generic_help', 'mod_ipal');
+$settings->add(new admin_setting_configcheckbox('mod_ipal/autocreate_generic',
                                                 $name,
                                                 $description,
                                                 1));
