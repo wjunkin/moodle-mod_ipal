@@ -1014,17 +1014,24 @@ function ipal_send_message_to_device($course) {
     $apikey = "AIzaSyARBhzl2L5MCV4-_rZNH6nz4xGHvhXpW2E";
 
     // Replace with real client registration IDs.
-    // Get users in the course, and then find the regIDs in the ipal_mobile table.
+    // Get the regIDs from the ipal_mobile table for students in this course.
     $context = context_course::instance($course->id);
     $studentrole = $DB->get_record('role', array('shortname' => 'student'));
-    $students = get_role_users($studentrole->id, $context);
+    $sql = 'SELECT user_id, reg_id
+                FROM {role_assignments} ra INNER JOIN {ipal_mobile} im ON ra.userid=im.user_id
+                WHERE ra.contextid = :contextid AND ra.roleid = :roleid';
+    $results = $DB->get_recordset_sql($sql, array('contextid'=>$context->id, 'roleid'=>$studentrole->id));
+
     $regids = array();
-    foreach ($students as $s) {
-        $r = $DB->get_record('ipal_mobile', array('user_id' => $s->id), $strictness = IGNORE_MISSING);
-        if ($r && $r->reg_id != '') {
-            array_push($regids, $r->reg_id);
-        }
+    foreach ($results as $r) {
+        array_push($regids, $r->reg_id);
     }
+
+    if (count($regids) === 0) {
+        // No students to push it to - don't bother contacting GCM.
+        return;
+    }
+
     // Message to be sent.
     $message = "x";
 
