@@ -1024,7 +1024,9 @@ function ipal_send_message_to_device($course) {
 
     $regids = array();
     foreach ($results as $r) {
-        array_push($regids, $r->reg_id);
+        if ($r->reg_id != '') {
+            array_push($regids, $r->reg_id);
+        }
     }
 
     if (count($regids) === 0) {
