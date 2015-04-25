@@ -225,14 +225,14 @@ $condition = new mod_ipal\bank\search\condition_unused($quiz);
 $questionbank->add_searchcondition($condition);
 
 echo '<div class="questionbankwindow block">';
-if (!empty(get_config('mod_ipal', 'autocreate_generic'))) {
+if (get_config('mod_ipal', 'autocreate_generic') > 0) {
     ipal_create_genericq($quiz->course);
 }
 echo '<div class="header"><div class="title">';
 echo "<h2>Add Questions</h2>";
 echo "</div></div>";
 echo '<div class="content"><div class="box generalbox questionbank">';
-if (!empty(get_config('mod_ipal', 'enable_compadre'))) {
+if (get_config('mod_ipal', 'enable_compadre') > 0) {
     // Include the ComPADRE question import form if enabled.
     require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
 }

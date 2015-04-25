@@ -155,7 +155,7 @@ function ipal_print_recent_activity($course, $viewfullnames, $timestart) {
  */
 function ipal_cron() {
     mtrace( "Running ipal Cron..." );
-    if (!empty(get_config('mod_ipal', 'analytics'))) {
+    if (get_config('mod_ipal', 'analytics') > 0) {
         mtrace('  Sending data to ComPADRE:');
         ipal_transfer_archive();
     } else {
