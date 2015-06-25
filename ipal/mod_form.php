@@ -82,9 +82,9 @@ class mod_ipal_mod_form extends moodleform_mod {
         $mform->addHelpButton('mobile', 'ipalmobile', 'ipal');
 
         // Adding the standard "intro" and "introformat" fields.
-        $this->add_intro_editor();
+        $this->standard_intro_elements(get_string('introduction', 'quiz'));
         // This is to fix a few weird insert issues.
-        $mform->addElement('hidden', 'questions', 'required', null, 'client');
+        $mform->addElement('hidden', 'questions', '');
         $mform->setType('questions', PARAM_RAW);
         $mform->addElement('hidden', 'preferredbehaviour', 'deferredfeedback');
         $mform->setType('preferredbehaviour', PARAM_RAW);
