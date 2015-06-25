@@ -52,10 +52,13 @@ function ipal_show_current_question_id($ipalid) {
  */
 function ipal_get_qtype($questionid) {
     global $DB;
-    $questiontype = $DB->get_record('question', array('id' => $questionid));
-    return($questiontype->qtype);
+    if ($questionid) {
+        $questiontype = $DB->get_record('question', array('id' => $questionid));
+        return($questiontype->qtype);
+    } else {
+        return('');
+    }
 }
-
 
 /**
  * Return a string = number of responses to each question and labels for questions.
@@ -67,6 +70,9 @@ function ipal_get_qtype($questionid) {
  */
 function ipal_count_questions($questionid, $ipalid) {
     global $DB;
+
+    $data = array();
+    $labels = array();
 
     $qtype = ipal_get_qtype($questionid);
     if ($qtype == 'essay') {
@@ -90,4 +96,6 @@ function ipal_count_questions($questionid, $ipalid) {
 }
 
 $ipalid = optional_param('ipalid', 0, PARAM_INT);
-echo md5("graph.php".ipal_count_questions(ipal_show_current_question_id($ipalid), $ipalid));
+if ($questionid = ipal_show_current_question_id($ipalid)) {
+    echo md5("graph.php".ipal_count_questions($questionid, $ipalid));
+}
