@@ -78,7 +78,7 @@ $string['editingipal_help'] = 'When selecting questions for ipal, the main conce
 * The order of questions is not important since you can send them in any order.
 * When polling you can send the same question more than once.';
 $string['basicideasofipal'] = 'The basic ideas of selecting questions for in-class polling';
-$string['introduction'] = 'Description';
+
 $string['ipal_analytics'] = 'improve analytics';
 $string['ipal_analytics_help'] = 'If this is selected the student polling data, identified only by the Moodle student userID, will be sent to
      the ComPADRE site so that an analysis of the data can be done.
