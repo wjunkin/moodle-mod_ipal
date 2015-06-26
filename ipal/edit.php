@@ -240,6 +240,10 @@ if ($DB->count_records('modules', array('name' => 'ejsapp'))) {
     echo "\nClick <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid'>
         to add EJS Apps</a>";
 }
+if ($DB->count_records('modules', array('name' => 'attendance'))) {
+    echo "\nClick <a href='".$CFG->wwwroot."/mod/ipal/attendance_ipal.php?cmid=$cmid'>
+        to manage attendance using ipal.</a>";
+}
 echo '</div>';
 
 echo '<span id="questionbank"></span>';

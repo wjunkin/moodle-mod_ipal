@@ -580,6 +580,11 @@ function ipal_show_current_question($ipalid) {
         // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
         $questiontext->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $questiontext->questiontext);
         echo "The current question is -> ".strip_tags($questiontext->questiontext);
+        if (preg_match("/Attendance question for session \d+/", $questiontext->name, $matchs)) {
+            $ipal = $DB->get_record('ipal', array('id' => $ipalid));
+            $timecreated = $ipal->timecreated;
+            echo "&nbsp;&nbsp;The attendance code is ".$question->question_id.$ipalid.substr($timecreated, strlen($timecreated) - 2, 2);
+        }
         return(1);
     } else {
         return(0);
