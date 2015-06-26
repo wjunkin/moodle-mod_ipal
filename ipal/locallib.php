@@ -176,7 +176,9 @@ function ipal_get_questions($ipalid) {
 
     // Get the questions and stuff them into an array.
     foreach ($questions as $q) {
-
+        if (empty($q)) {
+            continue;
+        }
         $aquestions = $DB->get_record('question', array('id' => $q));
         if (isset($aquestions->questiontext)) {
             // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
@@ -526,7 +528,7 @@ function ipal_display_instructor_interface($cmid, $ipalid) {
     // Script to make the preview window a popout.
     echo "\n<script language=\"javascript\" type=\"text/javascript\">
     \n function ipalpopup(id) {
-        \n\t url = ".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
+        \n\t url = '".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
         echo $cmid;
         echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
         echo "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
