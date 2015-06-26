@@ -39,10 +39,10 @@ defined('MOODLE_INTERNAL') || die();
  */
 function ipal_supports($feature) {
     switch($feature) {
-        case FEATURE_BACKUP_MOODLE2:
-            return true;
-        default:
-            return null;
+        case FEATURE_BACKUP_MOODLE2:            return true;
+        case FEATURE_SHOW_DESCRIPTION:          return true;
+        case FEATURE_USES_QUESTIONS:            return true;
+        default: return null;
     }
 }
 /**
