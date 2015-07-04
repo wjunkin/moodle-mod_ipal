@@ -119,6 +119,26 @@ function xmldb_ipal_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2015041501, 'ipal');
     }
 
+    if ($oldversion < 2015070200) {
+        $table = new xmldb_table('ipal_slots');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('slot', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('ipalid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('page', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1');
+            $table->add_field('requireprevious', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('maxmark', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+            // Conditionally launch add table ipal_mobile.
+            $dbman->create_table($table);
+        }
+
+        // Ipal savepoint reached.
+        upgrade_mod_savepoint(true, 2015070200, 'ipal');
+    }
+
     // Final return of upgrade result (true, all went good) to Moodle.
     return true;
 }
