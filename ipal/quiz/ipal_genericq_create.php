@@ -87,17 +87,12 @@ function ipal_create_genericq($courseid) {
     } else if (!empty($_ENV['SERVER_NAME'])) {
         $hostname = $_ENV['SERVER_NAME'];
     }
-    $date = gmdate("ymdHis");
-    $stamp = $hostname .'+'. $date .'+'.ipal_random_string(6);
-    $version = $hostname .'+'. $date .'+'.ipal_random_string(6);
     $questionfieldarray = array('category', 'parent', 'name', 'questiontext', 'questiontextformat', 'generalfeedback',
         'generalfeedbackformat', 'defaultgrade', 'penalty', 'qtype', 'length', 'stamp', 'version', 'hidden',
         'timecreated', 'timemodified', 'createdby', 'modifiedby');
     $questionnotnullarray = array('name', 'questiontext', 'generalfeedback');
     $questioninsert = new stdClass();
     $date = gmdate("ymdHis");
-    $stamp = $hostname .'+'. $date .'+'.ipal_random_string(6);
-    $version = $hostname .'+'. $date .'+'.ipal_random_string(6);
     $questioninsert->category = $categoryid;
     $questioninsert->parent = 0;
     $questioninsert->questiontextformat = 1;
@@ -106,8 +101,6 @@ function ipal_create_genericq($courseid) {
     $questioninsert->defaultgrade = 1;
     $questioninsert->penalty = 0;
     $questioninsert->length = 1;
-    $questioninsert->stamp = $stamp;
-    $questioninsert->version = $version;
     $questioninsert->hidden = 0;
     $questioninsert->timecreated = time();
     $questioninsert->timemodified = time();
@@ -117,6 +110,8 @@ function ipal_create_genericq($courseid) {
         $questioninsert->name = 'Generic multichoice question (1-8)';// This is the title.
         $questioninsert->questiontext = 'Please select an answer.';// This is the text.
         $questioninsert->qtype = 'multichoice';
+        $questioninsert->stamp = $hostname .'+'. $date .'+'.ipal_random_string(6);
+        $questioninsert->version = $questioninsert->stamp;
         $lastinsertid = $DB->insert_record('question', $questioninsert);
         $answeraieldarray = array('answer', 'answerformat', 'fraction', 'feedback', 'feedbackformat');
         $answernotnullarray = array('answer', 'feedback');
@@ -168,6 +163,9 @@ function ipal_create_genericq($courseid) {
         $questioninsert->name = 'Generic essay question';// Title.
         $questioninsert->questiontext = 'Please answer the question in the space provided.';// Text.
         $questioninsert->qtype = 'essay';
+        usleep(1);// This guarantees that the stamp for this question will be different from the multichoice stamp.
+        $questioninsert->stamp = $hostname .'+'. $date .'+'.ipal_random_string(6);
+        $questioninsert->version = $questioninsert->stamp;
         $lastinsertid = $DB->insert_record('question', $questioninsert);
         $essayoptions = new stdClass;
         $essayoptions->questionid = $lastinsertid;
