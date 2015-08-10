@@ -185,6 +185,13 @@ if (optional_param('quizdeleteselected', false, PARAM_BOOL) &&
     redirect($afteractionurl);
 }
 
+$submit = optional_param('submit', '', PARAM_ALPHA);
+if ($submit == 'Addthesequestionstothisipalactivity') {
+    // The PARAM_ALPHA function will remove all spaces from the value of submit.
+    // The teacher has come from the attendancequestion_ipal.php page and wants to add Attendance Questions.
+    require_once($CFG->dirroot . '/mod/ipal/add_attendancequestion.php');
+}
+
 // End of process commands =====================================================.
 
 $PAGE->requires->skip_link_to('quizcontentsblock',
@@ -241,8 +248,9 @@ if ($DB->count_records('modules', array('name' => 'ejsapp'))) {
         to add EJS Apps</a>";
 }
 if ($DB->count_records('modules', array('name' => 'attendance'))) {
-    echo "\nClick <a href='".$CFG->wwwroot."/mod/ipal/attendance_ipal.php?cmid=$cmid'>
-        to manage attendance using ipal.</a>";
+    echo "\n<form action='".$CFG->wwwroot."/mod/ipal/attendancequestion_ipal.php?cmid=$cmid' method='post'>";
+    echo "\n<input type='submit' name='submit' value='Add an attendance question'>";
+    echo "\n</form>";
 }
 echo '</div>';
 
@@ -270,8 +278,8 @@ echo '<div class="quizcontents" id="quizcontentsblock">';
 $repaginatingdisabledhtml = '';
 $repaginatingdisabled = false;
 
-echo '<a href="view.php?id='.$quiz->cmid.'">Start polling with '.$quiz->name."</a>\n<br />";
-echo $OUTPUT->heading('Current Questions for ' . $quiz->name, 2);// Modified for ipal.
+echo '<a href="view.php?id='.$quiz->cmid.'">Return to page to start polling with "'.$quiz->name."\"</a>\n<br />";
+echo $OUTPUT->heading('Page to Add or Change Current Questions for "' . $quiz->name."\"", 2);// Modified for ipal.
 echo $OUTPUT->help_icon('editingipal', 'ipal', get_string('basicideasofipal', 'ipal'));
 
 $tabindex = 0;

@@ -29,6 +29,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['anonymousmess'] = 'Your answer is recorded anonymously';
+$string['attendancequestion'] = 'Are you here today ';
+$string['attendancequestion2'] = ' If so, please type the posted attendance code
+    in the text box and submit it so that you can be counted present. ';
 $string['basicideasofipal'] = 'The basic ideas of selecting questions for in-class polling';
 $string['editingipal'] = 'Adding (selecting) ipal questions';
 $string['editingipal_ex'] = 'Editing ipal: {$a}';
@@ -78,7 +81,7 @@ $string['editingipal_help'] = 'When selecting questions for ipal, the main conce
 * The order of questions is not important since you can send them in any order.
 * When polling you can send the same question more than once.';
 $string['basicideasofipal'] = 'The basic ideas of selecting questions for in-class polling';
-
+$string['introduction'] = 'Description';
 $string['ipal_analytics'] = 'improve analytics';
 $string['ipal_analytics_help'] = 'If this is selected the student polling data, identified only by the Moodle student userID, will be sent to
      the ComPADRE site so that an analysis of the data can be done.

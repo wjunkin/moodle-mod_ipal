@@ -183,7 +183,19 @@ function ipal_get_questions($ipalid) {
         if (isset($aquestions->questiontext)) {
             // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
             $aquestions->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $aquestions->questiontext);
-            $pagearray2[] = array('id' => $q, 'question' => strip_tags($aquestions->questiontext),
+            $aquestions->questiontext = strip_tags($aquestions->questiontext);
+            if (preg_match("/Attendance question for session (\d+)/", $aquestions->name, $matchs)) {
+                // Adding form to allow attendance update through ipal.
+                $attendancelink = "<input type='button' onclick=\"location.href='attendancerecorded_ipal.php?";
+                $attendancelink .= "ipalid=$ipalid";
+                $attendancelink .= "&qid=$q";
+                $sessid = $matchs[1];
+                $attendancelink .= "&sessid=$sessid";
+                $attendancelink .= "&update_record=Update_this_attendance_record';\" ";
+                $attendancelink .= "value='Update this attendance record'>\n<br />";
+                $aquestions->questiontext = $aquestions->questiontext.$attendancelink;
+            }
+            $pagearray2[] = array('id' => $q, 'question' => $aquestions->questiontext,
                 'answers' => ipal_get_answers($q));
         }
     }
@@ -583,7 +595,8 @@ function ipal_show_current_question($ipalid) {
         if (preg_match("/Attendance question for session \d+/", $questiontext->name, $matchs)) {
             $ipal = $DB->get_record('ipal', array('id' => $ipalid));
             $timecreated = $ipal->timecreated;
-            echo "&nbsp;&nbsp;The attendance code is ".$question->question_id.$ipalid.substr($timecreated, strlen($timecreated) - 2, 2);
+            echo "\n<br /><br />The attendance code is ".
+                $question->question_id.$ipalid.substr($timecreated, strlen($timecreated) - 2, 2);
         }
         return(1);
     } else {
@@ -1027,7 +1040,7 @@ function ipal_send_message_to_device($course) {
     $sql = 'SELECT user_id, reg_id
                 FROM {role_assignments} ra INNER JOIN {ipal_mobile} im ON ra.userid=im.user_id
                 WHERE ra.contextid = :contextid AND ra.roleid = :roleid';
-    $results = $DB->get_recordset_sql($sql, array('contextid'=>$context->id, 'roleid'=>$studentrole->id));
+    $results = $DB->get_recordset_sql($sql, array('contextid' => $context->id, 'roleid' => $studentrole->id));
 
     $regids = array();
     foreach ($results as $r) {

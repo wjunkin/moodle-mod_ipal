@@ -59,53 +59,94 @@ if (!$attendanceinstance = $DB->get_records('attendance', array('course' => $cou
     exit;
 }
 
-// The ipal instance must allow mobile responses so that the teacher can see the access code.
-if (!($ipal->mobile > 0)) {
-    echo "\n<br />You must allow mobile responses in this ipal instance so that the access code is displayed to the teacher.";
-    exit;
-}
+echo "\n<br /><br />When you select one of the questions below, ipal will create a question (an Attendance Question)
+    for students to answer to indicate their presence in the class.
+    \n<br />This Attendance Question requires students to enter the attendance code.
+    The attendance code is displayed on the teacher's computer beside the Attendance Question when it is the active question.
+    You (the teacher) can display this attendance code from your computer or give it to the class in another way.
+    Thus, the student must be present in class to know what number to enter.
+    \n<br />The Attendance Question can be sent to the class at any time during this ipal activity.
+    \n<br />Polling can be started and stopped at any time.";
+echo "\n<br />Attendance Questions in this ipal activity have an'Update this attendance record' link
+    at the end of the Attendance Question. Once some (or all) of the students have answered the Attendance Question,
+    you (the teacher) should click on this link. Ipal will automatically examine all the student answers
+    and will mark as present every student who has submitted the correct attendance code.
+    This can be done while class is going on
+    or after class is finished and can be done more than once.";
+echo "\n<br />At any time you (the teacher) can go into the attendance module and correct, modify, or augment
+    the record that the ipal program has placed in the attendance module.
+    For example, if some students have forgotten their smart phones,
+    you can mark them present in the attendance module if they hand to you a sheet of paper indicating their presence.";
+echo "\n<br />Here is the way an attendance question will look:";
+echo "\n<br /><br /><h4>";
+echo get_string('attendancequestion', 'ipal')." (the Attendance Date)? ".
+   get_string('attendancequestion2', 'ipal');
+echo "</h4>";
 
-// Remove attendance question from ipal if the teacher changes her or his mind.
-if ($undo == 'UNDO') {
-    $qid = optional_param('qid', '0', PARAM_INT);
-    if ($qid > 0) {
-        $questions = $ipal->questions;
-        $remove = $qid.","; 
-        $newquestions = preg_replace("/$remove/",'',$questions);
-        $result = $DB->set_field('ipal', 'questions', $newquestions, array('id' => $ipal->id));
-        if ($result) {
-            echo "\n<br />question $qid removed";
-        } else {
-            echo "\n<br />question $qid not removed.";
-        }
-    }
+// Javascript to check and uncheck all boxes.
+?>
+<script lang='javascript'>
+function toggle(source) {
+  checkboxes = document.getElementsByName('attendsessionid[]');
+  for(var i=0, n=checkboxes.length;i<n;i++) {
+    checkboxes[i].checked = source.checked;
+  }
 }
+</script>
 
-echo "\n<form action='add_attendancequestion.php'>";
+<?php
+echo "\n<br /><form action='edit.php'>";
+// Adding a toggle all checkbox.
+echo "\n<br /><input type='checkbox' onClick='toggle(this)' /> Create questions for all dates.";
+echo "\n<br />You can also check and uncheck individual items by hand.<br /><br />";
 echo "\n<input type='hidden' name='cmid' value='$cmid'>";
 // Getting the attendance sessions from the attendance module.
 $sessioncount = 0;// Used to check if there is an attendance session.
+$attenddate = array();// The array for dates for a given session.
+$ipalqs = explode(",", $ipal->questions);// Get this list of question ids for this ipal activity.
+$ipalsessions = array();// The array of attendance sessions that already have a question in this ipal.
+// Find out which sessions are already in ipal questions.
+foreach ($ipalqs as $keys => $value) {
+    if ($value > 0) {
+        $aquestion = $DB->get_record('question', array('id' => $value));
+        if (preg_match("/Attendance question for session (\d+)/", $aquestion->name, $matchs)) {
+            $ipalsessions[] = $matchs[1];
+        }
+    }
+}
 foreach ($attendanceinstance as $attendanceid => $value) {
+    echo "\n<br />Attendance Dates for the following Attendance Activity: '".$value->name."'";
     $sessions = $DB->get_records('attendance_sessions', array('attendanceid' => $attendanceid));
-    foreach ($sessions as $session){
+    unset($attenddate);
+    foreach ($sessions as $session) {
         // There is an attendance session.
         $sessioncount++;
         // Date of the session in the attendance module.
         $date = $session->sessdate;
         // Id of the session in the attendance module.
         $sessid = $session->id;
-        echo "\n<br /><input type='radio' name='attendsessionid' value='$sessid'>";
-        echo "Are you here today (".date('D, d F Y h:i',$date).")? 
-            If so, please type the posted access code in the text box and submit it so that you can be counted present.";
+        $attenddate[$sessid] = $date;
     }
+    asort($attenddate);
+    foreach ($attenddate as $key => $value) {
+        if (!(in_array($key, $ipalsessions))) {
+            echo "\n<br /><input type='checkbox' name='attendsessionid[]' value='$key'>";
+            echo date('D, d F Y h:i', $value)."\n<br />";
+        } else {
+            echo "\n<br />".date('D, d F Y h:i', $value)." is already in the ipal activity.\n<br />";
+        }
+    }
+
 }
+
 if ($sessioncount) {
-    echo "\n<br />Please select the Attendance Session and then ";
-    echo "\n<br />click below to add the attendance question to this ipal activity (".$ipal->name.").<br />\n";
+    echo "\n<br />Please select the Attendance Session(s) and then ";
+    echo "\n<br />click below to add the attendance question(s) to this ipal activity (".$ipal->name.").<br />\n";
 } else {
-    echo "\n<br />You must create at least one attendance session in an Attendance Activity before you can add an Attendance question.";
+    echo "\n<br />You must create at least one attendance session in an Attendance Activity before you can
+        add an Attendance question.";
 }
-echo "\n<br /><input type='submit' value='add this question to this ipal activity'>";
+echo "\n<br /><input type='submit' name='submit' value='Add these questions to this ipal activity'>";
 echo "\n<br /></form>";
 
 // Finish the page.
