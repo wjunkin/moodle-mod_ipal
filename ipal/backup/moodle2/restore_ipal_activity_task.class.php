@@ -99,8 +99,6 @@ class restore_ipal_activity_task extends restore_activity_task {
     static public function define_restore_log_rules_for_course() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('ipal', 'view all', 'index?id={course}', null,
-                                        null, null, 'index.php?id={course}');
         $rules[] = new restore_log_rule('ipal', 'view all', 'index.php?id={course}', null);
 
         return $rules;

@@ -61,10 +61,12 @@ class restore_ipal_activity_structure_step extends restore_activity_structure_st
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('ipal', '/activity/ipal');
+        $paths[] = new restore_path_element('ipal_question_instance',
+                '/activity/ipal/question_instances/question_instance');
         $paths[] = new restore_path_element('answer', '/activity/ipal/answered/answer');
         if ($userinfo) {
-            $paths[] = new restore_path_element('answered_archive_element',
-                '/activity/ipal/answered_archive/answered_archive_element');
+            $paths[] = new restore_path_element('answeredarchiveelement',
+                '/activity/ipal/answeredarchive/answeredarchiveelement');
         }
 
         return $this->prepare_activity_structure($paths);
@@ -83,10 +85,44 @@ class restore_ipal_activity_structure_step extends restore_activity_structure_st
 
         $data->timecreated = $this->apply_date_offset($data->timecreated);
 
+        // Remove any Attendance Questions.
+        $questionlist = explode(",", $data->questions);
+        $newquestionlist = array();
+        foreach ($questionlist as $key => $value) {
+            if ($value > 0) {
+                $question = $DB->get_record('question', array('id' => $value));
+                if (!(preg_match("/Attendance question for session (\d+)/", $question->name, $matches))) {
+                    $newquestionlist[] = $value;
+                }
+            } else {
+                $newquestionlist[] = 0;
+            }
+        }
+        $data->questions = implode(",", $newquestionlist);
         $data->questions = $this->questions_recode_layout($data->questions);
 
         $newitemid = $DB->insert_record('ipal', $data);
         $this->apply_activity_instance($newitemid);
+    }
+
+    /**
+     * Convert the question ids data for the new ipal instance
+     * @param object $data
+     */
+    protected function process_ipal_question_instance($data) {
+        global $DB;
+
+        $ipal = $DB->get_record('ipal', array('id' => $this->get_new_parentid('ipal')));
+        $questions = $ipal->questions;
+        $data = (object)$data;
+        $oldquestionid = $data->questionid;
+        $data->ipalid = $this->get_new_parentid('ipal');
+        $data->questionid = $this->get_mappingid('question', $data->questionid);
+        $DB->insert_record('ipal_slots', $data);
+        $questions = preg_replace("/\,$oldquestionid\,/", ','.$data->questionid.',', ','.$questions.',');
+        $questions = preg_replace("/^\,/", '', $questions);
+        $questions = preg_replace("/\,$/", '', $questions);
+        $DB->set_field('ipal', 'questions', $questions, array('id' => $data->ipalid));
     }
 
     /**
@@ -101,11 +137,11 @@ class restore_ipal_activity_structure_step extends restore_activity_structure_st
 
         $data->ipalid = $this->get_new_parentid('ipal');
         $data->time_created = $this->apply_date_offset($data->time_created);
-
         $data->ipal_id = $this->get_new_parentid('ipal');
         $data->quiz_id = $this->get_new_parentid('ipal');
         $data->class_id = $this->get_courseid();
         $data->ipal_code = "0";
+        $data->question_id = $this->get_mappingid('question', $data->question_id);
 
         $newitemid = $DB->insert_record('ipal_answered', $data);
         $this->set_mapping('answers', $oldid, $newitemid);
@@ -115,7 +151,7 @@ class restore_ipal_activity_structure_step extends restore_activity_structure_st
      * Convert the archived data for this new ipal instance
      * @param object $data
      */
-    protected function process_answered_archive_element($data) {
+    protected function process_answeredarchiveelement($data) {
         global $DB;
 
         $data = (object)$data;
@@ -127,15 +163,18 @@ class restore_ipal_activity_structure_step extends restore_activity_structure_st
 
         $data->ipal_id = $this->get_new_parentid('ipal');
         $data->quiz_id = $this->get_new_parentid('ipal');
+        $data->question_id = $this->get_mappingid('question', $data->question_id);
+        $data->ipal_code = "0";
 
         $newitemid = $DB->insert_record('ipal_answered_archive', $data);
-        $this->set_mapping('answered_archive_element', $oldid, $newitemid);
+        $this->set_mapping('answeredarchiveelement', $oldid, $newitemid);
     }
 
     /**
      * Function to finish up the job
      */
     protected function after_execute() {
-        $this->add_related_files('mod_ipal', 'intro', null);
+        global $DB;
+        $ipalid = $this->add_related_files('mod_ipal', 'intro', null);
     }
 }
