@@ -82,16 +82,20 @@ class mod_ipal_mod_form extends moodleform_mod {
         $mform->addHelpButton('mobile', 'ipalmobile', 'ipal');
 
         // Adding the standard "intro" and "introformat" fields.
-        $this->add_intro_editor();
-        // Use this in Moodle 2.9 $this->standard_intro_elements(get_string('introduction', 'quiz')); or later.
-        // This is to fix a few weird insert issues.
+        if (method_exists($this, 'standard_intro_elements')) {
+            // Introduction.
+            // Use this in Moodle 2.9 or later $this->standard_intro_elements(get_string('introduction', 'ipal'));.
+            $this->standard_intro_elements(get_string('introduction', 'ipal'));
+        } else {
+            $this->add_intro_editor();
+        }// This is to fix a few weird insert issues.
         $mform->addElement('hidden', 'questions', '');
         $mform->setType('questions', PARAM_RAW);
         $mform->addElement('hidden', 'preferredbehaviour', 'deferredfeedback');
         $mform->setType('preferredbehaviour', PARAM_RAW);
 
         // ...==========================================================================.
-        // Adding the rest of ipal settings, spreeading all them into this fieldset.
+        // Adding the rest of ipal settings, spreading all them into this fieldset.
         // Or adding more fieldsets ('header' elements) if needed for better logic.
         // ...===========================================================================.
         // Add standard elements, common to all modules.

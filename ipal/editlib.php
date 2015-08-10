@@ -249,10 +249,24 @@ function ipal_move_question_down($layout, $questionid) {
 
 // Parent class for the below, inheriting from either namespaced class (2.8+) or old flat class (2.7).
 if (class_exists('mod_quiz\question\bank\custom_view')) {
-    class ipal_question_bank_view_parent extends mod_quiz\question\bank\custom_view {}
+    /**
+     * Parent subclass for ipal_question_bank_view if there is a namespaced class in the quiz module (2.8+).
+     * 
+     * @copyright 2015 William F. Junkin
+     * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+     */
+    class ipal_question_bank_view_parent extends mod_quiz\question\bank\custom_view {
+    }
 } else {
     require_once($CFG->dirroot . '/mod/quiz/editlib.php');
-    class ipal_question_bank_view_parent extends quiz_question_bank_view {}
+    /**
+     * Parent subclass for ipal_question_bank_view for versions before 2.8.
+     * 
+     * @copyright 2015 William F. Junkin
+     * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+     */
+    class ipal_question_bank_view_parent extends quiz_question_bank_view {
+    }
 }
 
 /**
@@ -270,7 +284,7 @@ class ipal_question_bank_view extends ipal_question_bank_view_parent {
 
     /**
      * Function to provide the correct URL for use in IPAL.
-     * This provides the cahnge needed to use the class quiz_question_bank_view in IPAL.
+     * This provides the change needed to use the class quiz_question_bank_view in IPAL.
      *
      * @param int $questionid The id of the question.
      * @return object the correct url for IPAL.
@@ -283,7 +297,13 @@ class ipal_question_bank_view extends ipal_question_bank_view_parent {
         return new moodle_url('/mod/ipal/edit.php', $params);
     }
 
-    // We need to pass through the IPAL edit URL to ensure that everything works.
+    /**
+     * Function to provide the correct URL for use in IPAL in forms.
+     *
+     * @param bool $showquestiontext Display the text of the question within the list.
+     * @param string $scriptpath path to the script displaying this page.
+     * @param bool $showtextoption whether to include the 'Show question text' checkbox.
+     */
     protected function display_options_form($showquestiontext, $scriptpath = '/mod/ipal/edit.php',
             $showtextoption = false) {
         // Overridden just to change the default values of the arguments.
@@ -291,6 +311,12 @@ class ipal_question_bank_view extends ipal_question_bank_view_parent {
     }
 
     // The custom_view class overrides this with an empty function.  We want it back.
+    /**
+     * Function to create the button to create new questions in ipal.
+     *
+     * @param int $category The category for the new question.
+     * @param bool $canadd True if the user has permission to add a question.
+     */
     protected function create_new_question_form($category, $canadd) {
         global $CFG;
         echo '<div class="createnewquestion">';
