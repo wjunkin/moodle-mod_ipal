@@ -23,12 +23,7 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-?>
-<html>
-<head>
-</head>
-<body>
-<?php
+
 require_once('../../config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
 $ipalid = optional_param('ipalid', 0, PARAM_INT);
@@ -154,7 +149,12 @@ function ipal_count_question_codes($questioncode) {// What questions and what re
 
 }
 
-
+?>
+<html>
+<head>
+</head>
+<body>
+<?php
 echo "Total Responses --> ".ipal_count_thistime_responses()."/".ipal_who_sofar_count($ipalid);
 
 /**

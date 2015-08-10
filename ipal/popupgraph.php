@@ -22,12 +22,13 @@
  * @copyright 2011 W. F. Junkin, Eckerd College (http://www.eckerd.edu) 
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+$ipalid = optional_param('ipalid', 0, PARAM_INT);// The id of this IPAL instance.
 ?>
 <html>
 <head>
 <?php
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-$ipalid = optional_param('ipalid', 0, PARAM_INT);// The id of this IPAL instance.
 echo "<meta http-equiv=\"refresh\" content=\"3;url=?ipalid=".$ipalid."\">";
 ?>
 </head>
