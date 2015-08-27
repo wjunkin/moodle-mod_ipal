@@ -1,0 +1,62 @@
+This files describes changes in the ipal code.
+
+=== 2.9 (but keeping the program running in Moodle 2.8 and 2.7) ===
+
+* There have been changes in classes that can be used from the quiz module. 
+    class quiz_questionbank_view no longer exitst.
+    This version puts in an if statement to take care the change of classes. 
+    Line 251 in mod/ipal/edit.php looks for the new class.
+    if (class_exists('mod_quiz\question\bank\custom_view')) {
+* Take care of the deprecation on the function add_intro_editor() through line 85 in /mod/ipal/mod_form
+    if (method_exists($this, 'standard_intro_elements')) {
+* Made the question stamp for the generic questions unique by creating each stamp individually in /mod/ipal/quiz/ipal_genericq_create.php
+* Create the utility to use ipal to eaisy take attendance in the Moodle attendance module.
+    (Thanks to the Moodle team at the University of Jerusalem for help with the design of this utility.)
+    Ipal now looks to see if the attendance module has been added to the Moodle site.
+    If it has the teacher then has the option to create "Attendance Questions."
+    If the teacher clicks to select this option, the list of Attendance Sessions for that course is displayed.
+    If the teacher then selects one or more of the sessions, ipal creates an "Attendance Question" for each
+        of the selected Attendance Sessions. These "Attendance Questions" can then be added to ipal instances.
+    When the teacher sends an "Attendance Question" during a polling session, a unique attendance code is displayed
+        to the teacher. The teacher lets the students who are present know this unique code. The "Attendance Question"
+        asks the students to submit the attendance code as their answer to the "Attendance Question."
+    At any time the teacher can click a button beside any "Attendance Question." The ipal program then parses the student
+        answers for that question. All students who submitted the attendance code as their answer are marked present.
+        The ipal program notifies the teacher with a list of those students marked present. The teacher can change
+        the attendance record by hand at any time.
+    
+    + Modify the /mod/ipal/edit.php script to display the option for adding "Attendance Questions."
+    + Modify the /mod/ipal/locallib.php script to provide the needed functions.
+    + Add some of the new text strings into the /mod/ipal/lang/en/ipal.php script.
+    + Add a new page where teachers add the "Attendance Questions", /mod/ipal/attendancequestion_ipal.php
+    + Add a page to let the teacher know what has been updated in the attendance session, /mod/ipal/attendancerecorded_ipal.php
+    
+* Update the backup and restore utilities to handle questions correctly, even when restoring to a different Moodle site.
+    + Add in the table ipal_slots to the database with both the install and upgrade function.
+        This required modification to /mod/ipal/db/install.xml and /mod/ipal/db/upgrade.php
+        This makes some of the ipal handling of questions similar to the handling in the quiz module.        
+    + Change all the backup and restore scripts.
+
+* Improve the display of questions from the question bank to use the utilities from the quiz module.
+    (Thanks to Paul Nicholls for this improvement in the code.)
+    + Changes in the following scripts:
+        - /mod/ipal/classes/bank/search/condition_unused.php
+        - /mod/ipal/edit.php
+        - /mod/ipal/editlib.php
+        - /mod/ipal/styles.css
+    
++ Added options to the ipal module
+    (Thanks to Paul Nicholls for this improvement in the code.)
+    + Administrators can turn off sending data to compadre for improved analytics.
+    + Administrators can turn off allowing teachers to get questions from compadre
+    + Administrators can turn off the creation of the default generic questions.
+    + These changes required changes to the code in the following ipal scripts:
+        - /mod/ipal/settings.php
+        - /mod/ipal/upgrade.php
+        - /mod/ipal/edit.php
+        - /mod/ipal/lang/en/ipal.php
+        - /mod/ipal/lib.php
+
+=== Earlier changes ===
+
+* Were not documented in this way. Sorry.
