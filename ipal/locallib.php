@@ -724,7 +724,7 @@ function findinstructor($cnum) {
             ro.shortname='editingteacher' AND r.roleid =ro.id AND
             c.id = ? AND cx.contextlevel =50";
     // The variable $cnum is the id number for the course in the course table.
-    $result = $DB->get_record_sql($query, array($cnum));
+    $result = $DB->get_record_sql($query, array($cnum), IGNORE_MULTIPLE);
     if (!$result) {
         return('none');
     } else {
