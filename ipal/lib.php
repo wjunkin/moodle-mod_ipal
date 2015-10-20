@@ -189,57 +189,74 @@ function ipal_transfer_archive() {
         $xmlheader .= "<ipal_version>".$version->value."</ipal_version>\n";
         $xmlheader .= "<rosters>\n";
         $question = '';
+        $compadreids = array(); // The array for ids of responses to questions that came from compadre.
+        $moodleids = array(); // The array for ids of responses to qustions that were created in Moodle.
         foreach ($drecords as $record) {
-            $ids[] = $record->id;
-            $question .= "<question>\n";
+            $myid = $record->id;
             $qversion = $DB->get_record('question', array('id' => $record->question_id));
-            $question .= "<version>".$qversion->version."</version>\n";
-            $question .= "<archive_id>".$record->id."</archive_id>\n";
-            $question .= "<user_id>".$record->user_id."</user_id>\n";
-            $question .= "<question_id>".$record->question_id."</question_id>\n";
-            $question .= "<ipal_id>".$record->quiz_id."</ipal_id>\n";
-            $question .= "<answer_id>".$record->answer_id."</answer_id>\n";
-            $aversion = $DB->get_record('question_answers', array('id' => $record->answer_id));
-            $aversionanswer = '';
-            if (isset($aversion->answer)) {
-                $aversionanswer = $aversion->answer;
+            if (preg_match("/compadre\.org/", $qversion->version)) {//This question came from compadre.org. Transfer it.
+                $compadreids[] = $myid;
+                $question .= "<question>\n";
+                $question .= "<version>".$qversion->version."</version>\n";
+                $question .= "<archive_id>".$record->id."</archive_id>\n";
+                $question .= "<user_id>".$record->user_id."</user_id>\n";
+                $question .= "<question_id>".$record->question_id."</question_id>\n";
+                $question .= "<ipal_id>".$record->quiz_id."</ipal_id>\n";
+                $question .= "<answer_id>".$record->answer_id."</answer_id>\n";
+                $aversion = $DB->get_record('question_answers', array('id' => $record->answer_id));
+                $aversionanswer = '';
+                if (isset($aversion->answer)) {
+                    $aversionanswer = $aversion->answer;
+                }
+                $question .= "<answer_hash>".md5($aversionanswer)."</answer_hash>\n";
+                $question .= "<class_id>".$record->class_id."</class_id>\n";
+                $courseroster[$record->class_id] = 1;
+                $courseinstructor[$record->class_id] = $record->instructor;
+                $courseshortname[$record->class_id] = $record->shortname;
+                $question .= "<ipal_code>".$record->ipal_code."</ipal_code>\n";
+                if ($record->answer_id == "-1") {
+                    $question .= "<a_text><![CDATA[".$record->a_text."]]></a_text>\n";
+                } else {
+                    $question .= "<a_text><![CDATA[]]></a_text>\n";
+                }
+                $question .= "<time_created>".$record->time_created."</time_created>\n";
+                $question .= "</question>\n";
+            } else { // This question was created in Moodle.
+                $moodleids[] = $myid;
             }
-            $question .= "<answer_hash>".md5($aversionanswer)."</answer_hash>\n";
-            $question .= "<class_id>".$record->class_id."</class_id>\n";
-            $courseroster[$record->class_id] = 1;
-            $courseinstructor[$record->class_id] = $record->instructor;
-            $courseshortname[$record->class_id] = $record->shortname;
-            $question .= "<ipal_code>".$record->ipal_code."</ipal_code>\n";
-            if ($record->answer_id == "-1") {
-                $question .= "<a_text><![CDATA[".$record->a_text."]]></a_text>\n";
-            } else {
-                $question .= "<a_text><![CDATA[]]></a_text>\n";
-            }
-            $question .= "<time_created>".$record->time_created."</time_created>\n";
-            $question .= "</question>\n";
         }
         // Preparing the roster for the courses.
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $studentroleid = $studentrole->id;
 
-        foreach ($courseroster as $key => $value) {
-            $courseid = $key;
-            // The int $courseid is the id for this course and the $studentroleid is the student role integer (default=5).
-            $query = "SELECT ra.userid FROM {role_assignments} ra, {context} cx
-                WHERE ra.contextid = cx.id AND cx.instanceid = ? AND ra.roleid = ? AND cx.contextlevel = 50";
-            $studentids = $DB->get_records_sql($query, array($courseid, $studentroleid));
-            foreach ($studentids as $key => $value) {
-                $studentid[] = $value->userid;
+        if (isset($courseroster) and count($courseroster) > 0) {
+            foreach ($courseroster as $key => $value) {
+                $courseid = $key;
+                // The int $courseid is the id for this course and the $studentroleid is the student role integer (default=5).
+                $query = "SELECT ra.userid FROM {role_assignments} ra, {context} cx
+                    WHERE ra.contextid = cx.id AND cx.instanceid = ? AND ra.roleid = ? AND cx.contextlevel = 50";
+                $studentids = $DB->get_records_sql($query, array($courseid, $studentroleid));
+                foreach ($studentids as $key => $value) {
+                    $studentid[] = $value->userid;
+                }
+                $xmlheader .= "<roster classid=\"$courseid\" instructor=\"".$courseinstructor[$courseid].'" shortname="'.
+                    $courseshortname[$courseid].'">'.join($studentid, ',')."</roster>\n";
+                unset($studentid);
             }
-            $xmlheader .= "<roster classid=\"$courseid\" instructor=\"".$courseinstructor[$courseid].'" shortname="'.
-                $courseshortname[$courseid].'">'.join($studentid, ',')."</roster>\n";
-            unset($studentid);
         }
         $xmlheader .= "</rosters>\n";// Note: This information will be sent before the question information.
         $xmlheader .= "<local_date>".date('U')."</local_date>\n</head>\n";
         $footer = "</ipal>\n";
+
         if (ipal_post_xml($xmlheader.$question.$footer) == "1") {
-            ipal_update_code($ids);
+            ipal_update_code($compadreids);
+        }
+        if (count($moodleids) > 0) {
+            foreach ($moodleids as $id) {
+                $result = $DB->set_field('ipal_answered_archive', 'sent', '3', array('id' => $id));
+                mtrace(".");
+            }
+
         }
     }
 }

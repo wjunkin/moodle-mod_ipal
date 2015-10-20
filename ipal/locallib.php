@@ -737,11 +737,14 @@ function findinstructor($cnum) {
             ro.shortname='editingteacher' AND r.roleid =ro.id AND
             c.id = ? AND cx.contextlevel =50";
     // The variable $cnum is the id number for the course in the course table.
-    $result = $DB->get_record_sql($query, array($cnum));
-    if (!$result) {
+    $results = $DB->get_records_sql($query, array($cnum));
+    if (!$results) {
         return('none');
     } else {
-        $instructorwww = $result->id.$CFG->wwwroot;
+        $instructorwww = '';
+        foreach ($results as $key => $result) {
+            $instructorwww .= $result->id.$CFG->wwwroot;
+        }
         return md5($instructorwww);
     }
 }
@@ -920,10 +923,12 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) 
         echo "<br><br><br><br>";
         echo "<p id=\"questiontype\">".ipal_get_qtype($questionid)."<p>";
         echo "<form class=\"ipalquestion\" action=\"?p=".$passcode."&user=".$username."\" method=\"post\">\n";
-
         // Display question text.
         echo "<fieldset>\n<legend>";
-        echo $myformarray[0]['question'];
+        $question = $myformarray[0]['question'];
+        // Remove bad tags from a question.
+        $question = preg_replace("/\<\!\-\-.+?\-\-\>/s",'', $question);
+        echo $question;
         echo "</legend>\n";
 
         if (ipal_get_qtype($questionid) == 'essay') { // Display text field if essay question.
