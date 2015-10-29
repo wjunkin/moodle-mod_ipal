@@ -24,14 +24,21 @@
 require_once('../../config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
 defined('MOODLE_INTERNAL') || die();
-$labels = optional_param('labels', '', PARAM_TAGLIST);
+$labels = optional_param_array('x', '', PARAM_TEXT);
 $data = optional_param('data', '', PARAM_TAGLIST);
 $total = optional_param('total', '', PARAM_INT);
 $line = new graph(700, 500);
 $line->parameter['title']   = '';
 $line->parameter['y_label_left'] = 'Number of Responses';
-$line->x_data = explode(",", $labels);
-$line->y_data['responses'] = explode(",", $data);
+foreach ($labels as $key => $value ) {
+    $labels[$key] = urldecode($value);
+}
+$line->x_data = $labels;
+$line->y_data['responses'] = explode(",", $data);//echo "\n<br />y data is ";
+//echo print_r($line->y_data['responses']);echo "\n<br /><br />";
+//$line->x_data['responses'] = unserialize($labels);//echo print_r($line->x_data['responses']);echo "\n<br />exit";exit;
+//$myarray = array('1', '2', '3', '4');
+//$line->x_data['responses'] = $myarray;
 $line->y_format['responses'] = array('colour' => 'blue', 'bar' => 'fill', 'shadow_offset' => 3);
 $line->y_order = array('responses');
 $line->parameter['y_min_left'] = 0;

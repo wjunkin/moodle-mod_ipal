@@ -140,12 +140,15 @@ function ipal_count_question_codes($questioncode) {// What questions and what re
     $question = $DB->get_record('ipal_active_questions', array('id' => $questioncode));
     $questionid = $question->question_id;
     $answers = $DB->get_records('question_answers', array('question' => $questionid));
-    foreach ($answers as $answers) {
-        $labels[] = preg_replace("/[^A-Za-z0-9 ]/", "", substr(strip_tags($answers->answer), 0, 20));
-        $data[] = $DB->count_records('ipal_answered', array('ipal_code' => $questioncode, 'answer_id' => $answers->id));
+    $labels = '';
+    $n = 0;
+    foreach ($answers as $answer) {
+        $labels .= "&x[$n]=".urlencode(substr(strip_tags($answer->answer), 0, 15));
+        $data[] = $DB->count_records('ipal_answered', array('ipal_code' => $questioncode, 'answer_id' => $answer->id));
+        $n ++;
     }
 
-    return( "?data=".implode(",", $data)."&labels=".implode(",", $labels)."&total=10");
+    return( "?data=".implode(",", $data).$labels."&total=10");
 
 }
 

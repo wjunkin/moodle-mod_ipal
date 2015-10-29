@@ -115,13 +115,15 @@ function ipal_count_questions($questionid) {
     global $DB;
     $ipalid = optional_param('ipalid', 0, PARAM_INT);// The id of this IPAL instance.
     $answers = $DB->get_records('question_answers', array('question' => $questionid));
+    $labels = '';
+    $n = 0;
     foreach ($answers as $answer) {
-        $labels[] = preg_replace("/[^A-Za-z0-9 ]/", "", substr(strip_tags($answer->answer), 0, 20));
+        $labels .= "&x[$n]=".urlencode(substr(strip_tags($answer->answer), 0, 15));
         $data[] = $DB->count_records('ipal_answered', array('ipal_id' => $ipalid, 'answer_id' => $answer->id));
-
+        $n ++;
     }
 
-    return( "?data=".implode(",", $data)."&labels=".implode(",", $labels)."&total=10");
+    return( "?data=".implode(",", $data).$labels."&total=10");
 
 }
 
