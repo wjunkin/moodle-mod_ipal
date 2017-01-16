@@ -45,5 +45,5 @@ echo "\n<input type='hidden' name='cmid' value='".$quiz->cmid."'>";
 echo "\n<input type='hidden' name='sessKeyHash' value='We will supply this'>";
 echo "\n<input type='submit' name='submit' value='Get questions from ComPADRE'>";
 echo "\n</form>";
-// The return url will be $_POST['moodleURL'].'/ipal/compadre_questions.php?cmid='.$_POST['cmid'].
+// The return url will be <main moodle site>.'/mod/ipal/compadre_questions.php'; the cmid value is returned as a POST value.
 // Compadre will return the sessKeyValue back to the Moodle site.
