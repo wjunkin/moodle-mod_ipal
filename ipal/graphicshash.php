@@ -63,7 +63,6 @@ function ipal_get_qtype($questionid) {
 /**
  * Return a string = number of responses to each question and labels for questions.
  *
- * Since this script must run as quickly as possible to refresh graphs, $_GET is used instead of optional_param().
  * @param int $questionid The question id in the active question table for the active question.
  * @param int $ipalid The id of this ipal instance.
  * @return string The number of responses to each question and labels for questions.
