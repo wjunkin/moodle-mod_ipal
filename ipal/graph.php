@@ -35,10 +35,6 @@ foreach ($labels as $key => $value ) {
 }
 $line->x_data = $labels;
 $line->y_data['responses'] = explode(",", $data);//echo "\n<br />y data is ";
-//echo print_r($line->y_data['responses']);echo "\n<br /><br />";
-//$line->x_data['responses'] = unserialize($labels);//echo print_r($line->x_data['responses']);echo "\n<br />exit";exit;
-//$myarray = array('1', '2', '3', '4');
-//$line->x_data['responses'] = $myarray;
 $line->y_format['responses'] = array('colour' => 'blue', 'bar' => 'fill', 'shadow_offset' => 3);
 $line->y_order = array('responses');
 $line->parameter['y_min_left'] = 0;
