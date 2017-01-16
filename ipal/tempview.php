@@ -36,7 +36,7 @@
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once('./locallib.php');
 
-$username = optional_param('user', '', PARAM_ALPHANUMEXT);
+$username = optional_param('user', '', PARAM_RAW_TRIMMED);
 $passcode = optional_param('p', 0, PARAM_INT);
 $regid = optional_param('r', '', PARAM_ALPHANUMEXT);
 $unreg = optional_param('unreg', 0, PARAM_INT);
