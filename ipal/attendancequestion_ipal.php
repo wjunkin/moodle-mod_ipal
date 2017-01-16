@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Provides utilities and interface to add resources from the Moodle EJS module to questions.
+ * Provides utilities and interface to add attendance questions (which are automatically graded) to IPAL activities.
  *
  * @package    mod_ipal
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu

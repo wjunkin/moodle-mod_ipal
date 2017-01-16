@@ -50,7 +50,7 @@ echo "Click <a href='".$CFG->wwwroot."/mod/ipal/view.php?id=$cm->id'>here</a> to
 $courseid = $course->id;
 // There must be at least one attendance module in the course.
 if (!$attendanceinstance = $DB->get_records('attendance', array('course' => $courseid))) {
-    echo "\n<br />You must create at least one EJS App activity in this course before you can add it to questions.";
+    echo "\n<br />You must create at least one Attendance activity in this course before you can add attendance questions.";
     exit;
 }
 
