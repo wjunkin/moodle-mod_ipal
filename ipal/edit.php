@@ -243,10 +243,6 @@ if (get_config('mod_ipal', 'enable_compadre') > 0) {
     // Include the ComPADRE question import form if enabled.
     require_once($CFG->dirroot . '/mod/ipal/quiz/compadre_access_form.php');
 }
-if ($DB->count_records('modules', array('name' => 'ejsapp'))) {
-    echo "\nClick <a href='".$CFG->wwwroot."/mod/ipal/ejs_ipal.php?cmid=$cmid'>
-        to add EJS Apps</a>";
-}
 if ($DB->count_records('modules', array('name' => 'attendance'))) {
     echo "\n<form action='".$CFG->wwwroot."/mod/ipal/attendancequestion_ipal.php?cmid=$cmid' method='post'>";
     echo "\n<input type='submit' name='submit' value='Add an attendance question'>";

@@ -37,7 +37,7 @@ $course = $DB->get_record('course', array('id' => $ipal->course), '*', MUST_EXIS
 $cm = get_coursemodule_from_instance('ipal', $ipal->id, $course->id, false, MUST_EXIST);
 require_login($course, true, $cm);
 $contextinstance = context_module::instance($cm->id);
-$PAGE->set_url('/mod/ipal/ejs_attendance.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/ipal/attendance_ipal.php', array('id' => $cm->id));
 $PAGE->set_title('Taking attendance through the '.$ipal->name.' activity');
 $PAGE->set_heading($course->shortname);
 
