@@ -150,6 +150,8 @@ function ipal_get_questionbank_questions($coursecontextid, $cmid, $ipalid) {
         foreach ($questions as $question) {
             $q = $question->id;
             if (isset($question->questiontext) and (!(in_array($q, $ipalquestions)))) {
+                // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+                $question->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $question->questiontext);
                 $pagearray2[] = array('id' => $q, 'question' => strip_tags($question->questiontext));
             }
         }
@@ -179,6 +181,8 @@ function ipal_get_questions($ipalid) {
         }
         $aquestions = $DB->get_record('question', array('id' => $q));
         if (isset($aquestions->questiontext)) {
+            // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+            $aquestions->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $aquestions->questiontext);
             $aquestions->questiontext = strip_tags($aquestions->questiontext);
             if (preg_match("/Attendance question for session (\d+)/", $aquestions->name, $matchs)) {
                 // Adding form to allow attendance update through ipal.
@@ -585,6 +589,8 @@ function ipal_show_current_question($ipalid) {
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
         $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
         $questiontext = $DB->get_record('question', array('id' => $question->question_id));
+        // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+        $questiontext->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $questiontext->questiontext);
         echo "The current question is -> ".strip_tags($questiontext->questiontext);
         if (preg_match("/Attendance question for session \d+/", $questiontext->name, $matchs)) {
             $ipal = $DB->get_record('ipal', array('id' => $ipalid));

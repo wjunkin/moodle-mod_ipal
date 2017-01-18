@@ -57,6 +57,8 @@ function ipal_show_current_question_bool($state) {
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipal->id))) {
         $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipal->id));
         $questiontext = $DB->get_record('question', array('id' => $question->question_id));
+        // Removing any EJS from the ipal/view.php page. Note: A dot does not match a new line without the s option.
+        $questiontext->questiontext = preg_replace("/EJS<ejsipal>.+<\/ejsipal>/s", "EJS ", $questiontext->questiontext);
         echo "The current question is -> ".strip_tags($questiontext->questiontext);
         return(1);
     } else {
