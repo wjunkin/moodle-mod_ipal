@@ -65,7 +65,6 @@ $event->trigger();
 $PAGE->set_url('/mod/ipal/view.php', array('id' => $cm->id));
 $PAGE->set_title($ipal->name);
 $PAGE->set_heading($course->shortname);
-$PAGE->set_button(update_module_button($cm->id, $course->id, get_string('modulename', 'ipal')));
 
 // Output starts here.
 echo $OUTPUT->header();

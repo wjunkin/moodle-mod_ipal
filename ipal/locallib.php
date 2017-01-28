@@ -925,10 +925,10 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) 
         echo "<form class=\"ipalquestion\" action=\"?p=".$passcode."&user=".$username."\" method=\"post\">\n";
         // Display question text.
         echo "<fieldset>\n<legend>";
-        $question = $myformarray[0]['question'];
+        $myquestion = $myformarray[0]['question'];
         // Remove bad tags from a question.
-        $question = preg_replace("/\<\!\-\-.+?\-\-\>/s",'', $question);
-        echo $question;
+        $myquestion = preg_replace("/\<\!\-\-.+?\-\-\>/s",'', $myquestion);
+        echo $myquestion;
         echo "</legend>\n";
 
         if (ipal_get_qtype($questionid) == 'essay') { // Display text field if essay question.
