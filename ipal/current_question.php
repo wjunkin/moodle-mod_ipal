@@ -30,7 +30,9 @@
 
 require_once('../../config.php');
 defined('MOODLE_INTERNAL') || die();
+// This program needs to run very quickly to let students know when the current question has changed.
 // Therefore it does not take time to check on login and
+// it uses the inval($_GET['ipalid']) which is about 40 times faster than optional_param('ipalid', 0, PARAM_INT).
 // It only returns the id number for the current question for a specific IPAL id.
 $ipalid = intval($_GET['ipalid']);
 if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
