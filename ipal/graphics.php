@@ -53,12 +53,12 @@ function ipal_show_current_question_id_graphics($ipalid) {
 }
 
 /**
- * Return the id for the current question
+ * Return the id for the current question from the ipal_active_question table.
  *
  * @param int $ipalid The ID for the IPAL instance
  * @return int The ID for the current question.
  */
-function ipal_current_question_code($ipalid) {// Finds the id in the active question table=ipal_code in ipal_answered table.
+function ipal_current_question_code($ipalid) {
     global $DB;
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
         $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
@@ -73,7 +73,7 @@ function ipal_current_question_code($ipalid) {// Finds the id in the active ques
  * @param int $ipalid The ID for the IPAL instance
  * @return array The user ids.
  */
-function ipal_who_thistime($ipalid) {// What answers::user_id have been given to this specific question this time.
+function ipal_who_thistime($ipalid) {
     global $DB;
     $questioncode = ipal_current_question_code($ipalid);
     $records = $DB->get_records('ipal_answered', array('ipal_code' => $questioncode));
@@ -104,7 +104,7 @@ function ipal_who_sofar_count($ipalid) {
  *
  * @return int The number of students submitting answers to this question.
  */
-function ipal_count_thistime_responses() {// How many responses to this question this time.
+function ipal_count_thistime_responses() {
     global $DB;
     $ipalid = optional_param('ipalid', 0, PARAM_INT);
     $questioncode = ipal_current_question_code($ipalid);
@@ -134,7 +134,7 @@ function ipal_count_active_responses() {
  * @param int $questioncode The id in the active question table for the active question.
  * @return string The number of responses to each question and labels for questions.
  */
-function ipal_count_question_codes($questioncode) {// What questions and what responses were given each time question sent.
+function ipal_count_question_codes($questioncode) {
     global $DB;
 
     $question = $DB->get_record('ipal_active_questions', array('id' => $questioncode));
@@ -180,7 +180,7 @@ function ipal_get_question_type($questionid) {
  * @param int $ipalid The id of this IPAL instance
  * @return array The essay answers to the active question.
  */
-function ipal_thistime_essay_answers($ipalid) {// Get the essay answers for this time.
+function ipal_thistime_essay_answers($ipalid) {
     global $DB;
     $questioncode = ipal_current_question_code($ipalid);
     $answerids = $DB->get_records('ipal_answered', array('ipal_code' => $questioncode));

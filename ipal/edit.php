@@ -54,8 +54,8 @@ require_once($CFG->dirroot . '/mod/ipal/editlib.php');
 $quizreordertool = optional_param('reordertool', -1, PARAM_BOOL);
 $scrollpos = optional_param('scrollpos', '', PARAM_INT);
 
-list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) =
-        question_edit_setup('editq', '/mod/ipal/edit.php', true);// Modified for IPAL.
+list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) = question_edit_setup
+        ('editq', '/mod/ipal/edit.php', true);// Modified for IPAL.
 $quiz->questions = ipal_clean_layout($quiz->questions);
 $defaultcategoryobj = question_make_default_categories($contexts->all());
 $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;

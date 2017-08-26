@@ -27,6 +27,7 @@
  * @copyright 2014 Eckerd College
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+require_once('../../config.php');
 require_once("$CFG->libdir/formslib.php");
 require_once($CFG->dirroot . '/mod/ipal/locallib.php');
 defined('MOODLE_INTERNAL') || die();
@@ -251,7 +252,7 @@ function ipal_move_question_down($layout, $questionid) {
 if (class_exists('mod_quiz\question\bank\custom_view')) {
     /**
      * Parent subclass for ipal_question_bank_view if there is a namespaced class in the quiz module (2.8+).
-     * 
+     *
      * @copyright 2015 William F. Junkin
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
@@ -261,7 +262,7 @@ if (class_exists('mod_quiz\question\bank\custom_view')) {
     require_once($CFG->dirroot . '/mod/quiz/editlib.php');
     /**
      * Parent subclass for ipal_question_bank_view for versions before 2.8.
-     * 
+     *
      * @copyright 2015 William F. Junkin
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */

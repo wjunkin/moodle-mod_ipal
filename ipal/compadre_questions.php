@@ -39,8 +39,8 @@ $PAGE->set_url('/mod/ipal/view.php', array('id' => $cm->id));
 $PAGE->set_title('Edit or add questions for IPAL');
 $PAGE->set_heading('My modules page heading');
 
-list($thispageurl, $contexts, $cmid, $cm, $ipal, $pagevars) =
-        question_edit_setup('editq', '/mod/ipal/compadre_questions.php', true);// Modified for ipal.
+list($thispageurl, $contexts, $cmid, $cm, $ipal, $pagevars) = question_edit_setup
+        ('editq', '/mod/ipal/compadre_questions.php', true);// Modified for ipal.
 
 $scrollpos = optional_param('scrollpos', '', PARAM_INT);
 

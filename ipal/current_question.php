@@ -21,7 +21,7 @@
  * since it is run every 3 seconds by the browser on every student involved in any ipal polling session.
  * Therefore, it is very important that it run very fast and not overload the server.
  * For this reason, the GET method is used to obtain the ipalid instead of the optional_param function.
- * If someone uses this function outside of its intended use, the only information returned will be the 
+ * If someone uses this function outside of its intended use, the only information returned will be the
  * question id of the current question for that ipal. They will not have access to the question itself.
  * @package    mod_ipal
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
@@ -30,7 +30,8 @@
 
 require_once('../../config.php');
 defined('MOODLE_INTERNAL') || die();
-
+// Therefore it does not take time to check on login and
+// It only returns the id number for the current question for a specific IPAL id.
 $ipalid = intval($_GET['ipalid']);
 if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
     $question = $DB->get_record('ipal_active_questions', array('ipal_id' => $ipalid));
