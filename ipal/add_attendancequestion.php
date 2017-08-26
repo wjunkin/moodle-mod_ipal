@@ -29,6 +29,8 @@
  * @param int $courseid The id of the course where attendance is being taken.
  * @return int The id of the question that was added.
  */
+require_once('../../config.php');
+
 function add_attendancequestion($attendsessionid, $courseid) {
     global $DB;
     global $USER;
@@ -125,7 +127,6 @@ function add_attendancequestion($attendsessionid, $courseid) {
     return $qid;
 }
 
-require_once('../../config.php');
 $cmid = optional_param('cmid', 0, PARAM_INT); // Course_module ID.
 $attendsessionids = optional_param_array('attendsessionid', 0, PARAM_INT); // ID of the attendance session.
 if ($cmid) {

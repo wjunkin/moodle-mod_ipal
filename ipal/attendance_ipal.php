@@ -65,26 +65,27 @@ if (!($ipal->mobile > 0)) {
 }
 
 echo "\n<br />This utility in ipal allows the teacher to use ipal to take attendance in the Moodle attendance module.";
-echo "There are three steps. Please click on the step that you wish to perform 
+echo "There are three steps. Please click on the step that you wish to perform
     (or click above to return to the ipal session):";
 echo "\n<ol>";
-    echo "\n<li>Click <a href='".$CFG->wwwroot."/mod/ipal/attendancequestion_ipal.php?cmid=$cmid'>here</a> 
+    echo "\n<li>Click <a href='".$CFG->wwwroot."/mod/ipal/attendancequestion_ipal.php?cmid=$cmid'>here</a>
         to create a question that students will answer to indicate their presence in the class.";
-        echo "\n<br />The question requires them to enter the ipal access code (posted or displayed from the teachers computer).</li>";
-        echo "\n<li>Once the question is created you (the teacher) should go to the ipal session and, at the appropriate time, 
+        echo "\n<br />The question requires them to enter the ipal access code
+        (posted or displayed from the teachers computer).</li>";
+        echo "\n<li>Once the question is created you (the teacher) should go to the ipal session and, at the appropriate time,
             send the attendance question to the students. You can start and stop polling at any time.</li>";
-        echo "\n<li>Once some (or all) of the students have answered the attendance question, you (the teacher) should return to 
-            this page and click <a href='".$CFG->wwwroot."/mod/ipal/attendanceupdate_ipal.php?cmid=$cmid'>here</a>. 
-            The page that is displayed will allow you to have ipal check the student responses and 
-            mark as present every student who has submitted the correct access code. This can be done while class is going on 
+        echo "\n<li>Once some (or all) of the students have answered the attendance question, you (the teacher) should return to
+            this page and click <a href='".$CFG->wwwroot."/mod/ipal/attendanceupdate_ipal.php?cmid=$cmid'>here</a>.
+            The page that is displayed will allow you to have ipal check the student responses and
+            mark as present every student who has submitted the correct access code. This can be done while class is going on
             or after class is finished and can be done more than once.</li>";
 echo "\n</ol>";
-echo "\n<br /><br />At any time you can access the attendance module and correct, modify, or augment the record that the ipal 
-    program has placed in the attendance module. For example, if some students have forgotten their smart phones, 
+echo "\n<br /><br />At any time you can access the attendance module and correct, modify, or augment the record that the ipal
+    program has placed in the attendance module. For example, if some students have forgotten their smart phones,
     you can mark them present in the attendance module if they
     hand to you a sheet of paper indicating their presence.</li>";
-echo "\n<br />The access code mentioned above is a random number, unique for every ipal instance, that is generated 
-    whenever mobile responses are allowed and is visible only to the teacher on the ipal web page where questions are 
+echo "\n<br />The access code mentioned above is a random number, unique for every ipal instance, that is generated
+    whenever mobile responses are allowed and is visible only to the teacher on the ipal web page where questions are
     sent during polling.";
 
 // Finish the page.
