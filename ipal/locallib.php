@@ -25,6 +25,7 @@
  * @copyright 2011 Eckerd College
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+require_once('../../config.php');
 require_once("$CFG->libdir/formslib.php");
 defined('MOODLE_INTERNAL') || die();
 
@@ -364,8 +365,7 @@ function ipal_send_question($ipalid) {
     }
     $lastinsertid = $DB->insert_record('ipal_active_questions', $record);
     if (($ipal->mobile == 1) || ($ipal->mobile == 3)) {
-        $course = $DB->get_record('course', array('id' => $ipal->course));
-        ipal_send_message_to_device($course);
+        ipal_refresh_firebase($ipalid);
     }
 
 }
@@ -380,6 +380,10 @@ function ipal_clear_question($ipalid) {
 
     if ($DB->record_exists('ipal_active_questions', array('ipal_id' => $ipalid))) {
         $mybool = $DB->delete_records('ipal_active_questions', array('ipal_id' => $ipalid));
+        $ipal = $DB->get_record('ipal', array('id' => $ipalid));
+        if (($ipal->mobile == 1) || ($ipal->mobile == 3)) {
+            ipal_refresh_firebase($ipalid);
+        }
     }
 }
 
@@ -882,8 +886,9 @@ function ipal_check_answered($ipalid) {
  * @param string $passcode The pass code to access the ipal instance.
  * @param string $username The username for the student.
  * @param int $ipalid The id for this ipal instance.
+ * @param string $ipalsesskey The ipal session key for this user.
  */
-function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) {
+function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, $ipalsesskey = "") {
     global $DB;
     global $CFG;
     global $USER;
@@ -893,7 +898,6 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) 
     $questionid = optional_param('question_id', 0, PARAM_INT);
     $activequestionid = optional_param('active_question_id', 0, PARAM_INT);
     $instructor = optional_param('instructor', 0, PARAM_ALPHANUM);
-
     ipal_java_questionupdate($ipalid);
     $priorresponse = '';
 
@@ -923,11 +927,12 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) 
         echo "<br><br><br><br>";
         echo "<p id=\"questiontype\">".ipal_get_qtype($questionid)."<p>";
         echo "<form class=\"ipalquestion\" action=\"?p=".$passcode."&user=".$username."\" method=\"post\">\n";
+        echo "<INPUT TYPE=hidden NAME=\"ipalsesskey\" value=\"$ipalsesskey\">";
         // Display question text.
         echo "<fieldset>\n<legend>";
         $myquestion = $myformarray[0]['question'];
         // Remove bad tags from a question.
-        $myquestion = preg_replace("/\<\!\-\-.+?\-\-\>/s",'', $myquestion);
+        $myquestion = preg_replace("/\<\!\-\-.+?\-\-\>/s", '', $myquestion);
         echo $myquestion;
         echo "</legend>\n";
 
@@ -950,7 +955,8 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) 
 
         // Hidden inputs.
         echo "<INPUT TYPE=hidden NAME=question_id VALUE=\"".$myformarray[0]['id']."\">";
-        echo "<INPUT TYPE=hidden NAME=active_question_id VALUE=\"$question->id\">";
+        // The object question is a row from the ipal_active_questions table."
+        echo "<INPUT TYPE=hidden NAME=active_question_id VALUE=\"".$question->id."\">";
         echo "<INPUT TYPE=hidden NAME=course_id VALUE=\"$courseid\">";
         echo "<INPUT TYPE=hidden NAME=user_id VALUE=\"$userid\">";
         echo "<INPUT TYPE=submit NAME=submit VALUE=\"Submit\" ".$disabled.">";
@@ -959,8 +965,28 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid) 
         echo "\n</fieldset>";
         echo "</form>\n";
     } else {
-        echo "<p id=\"questiontype\">nocurrentquestion<p>";
-        echo "<br><br>No Current Question.";
+        echo "debug981 in locallib<p id=\"questiontype\">nocurrentquestion<p>";
+        echo "<form class=\"ipalquestion\" action=\"?p=".$passcode."&user=".$username."\" method=\"post\">\n";
+        echo "<INPUT TYPE=hidden NAME=\"ipalsesskey\" value=\"$ipalsesskey\">";
+        echo "<fieldset>\n<legend>";
+            $qtypemessage = 'No question has been sent at this time.';
+        echo "\n$qtypemessage";
+        echo "</legend>\n";
+            echo  "<INPUT TYPE=hidden NAME=\"answer_id\" value=\"-2\">";// Removing doesn't work with refresh.
+        $ipal = $DB->get_record('ipal', array('id' => $ipalid));
+        $courseid = $ipal->course;
+        echo "<INPUT TYPE=hidden NAME=question_id VALUE=\"2\">";// Removing doesn't work with refresh.
+        // The object question is a row from the ipal_active_questions table.
+        echo "<INPUT TYPE=hidden NAME=active_question_id VALUE=\"24\">";// Removing doesn't work with refresh.
+        echo "<INPUT TYPE=hidden NAME=course_id VALUE=\"$courseid\">";
+        echo "<INPUT TYPE=hidden NAME=user_id VALUE=\"$userid\">";
+        echo "<INPUT TYPE=submit NAME=submit VALUE=\"Refresh\" ".$disabled.">";
+        echo "<INPUT TYPE=hidden NAME=ipal_id VALUE=\"$ipalid\">";
+        echo "<INPUT TYPE=hidden NAME=instructor VALUE=\"".findinstructor($courseid)."\">";
+        echo "\n</fieldset>";
+        echo "</form>\n";
+
+        exit;
     }
 }
 
@@ -979,7 +1005,6 @@ function ipal_tempview_save_response($questionid, $answerid, $activequestionid, 
     global $DB;
     global $CFG;
     global $USER;
-
     // Obtaining ipal id.
     if ($activequestionid > 0) {
         if ($activequestion = $DB->get_record('ipal_active_questions', array('id' => $activequestionid))) {
@@ -1024,6 +1049,7 @@ function ipal_tempview_save_response($questionid, $answerid, $activequestionid, 
         'ipal_id' => $ipalid ));
     }
     $lastinsertid = $DB->insert_record('ipal_answered', $record);
+
 }
 
 /**
@@ -1097,24 +1123,30 @@ function ipal_send_message_to_device($course) {
 /**
  * Add or Update (if existed) the regID that is associated with a userid
  *
- * @param string $regid
- * @param string $username
+ * @param string $regid The token associated with the users mobile device.
+ * @param string $user The username of the user.
+ * @param int $ipalid The id for the ipal instance.
  */
-function add_regid($regid, $username) {
+function add_regid($regid, $user, $ipalid) {
     global $DB;
-    if ($user = $DB->get_record('user', array('username' => $username))) {
-        if ($record = $DB->get_record('ipal_mobile', array('user_id' => $user->id))) {
-            $record->reg_id = $regid;
-            $record->time_created = time();
-            $DB->update_record('ipal_mobile', $record);
+    if ($user = $DB->get_record('user', array('username' => $user))) {
+        if ($record = $DB->get_record('ipal_devices', array('user_id' => $user->id))) {
+            $record->token = $regid;
+            $record->ipal_id = $ipalid;
+            $record->time_modified = time();
+            $record->mobile_type = 3;// 3 is the number I have chosen for android devices.
+            $DB->update_record('ipal_devices', $record);
             return true;
         } else {
             $recordnew = new stdClass();
             $recordnew->id = '';
             $recordnew->user_id = $user->id;
-            $recordnew->reg_id = $regid;
+            $recordnew->token = $regid;
+            $recordnew->ipal_id = $ipalid;
             $recordnew->time_created = time();
-            $DB->insert_record('ipal_mobile', $recordnew);
+            $recordnew->time_modified = time();
+            $recordnew->mobile_type = "android";
+            $DB->insert_record('ipal_devices', $recordnew);
             return true;
         }
     }
@@ -1134,5 +1166,75 @@ function remove_regid($username) {
             $DB->update_record('ipal_mobile', $record);
             return true;
         }
+    }
+}
+/**
+ * Refresh mobile devices using Firebase.
+ * @param int $ipalid the ID of the IPAL instance.
+ */
+function ipal_refresh_firebase($ipalid) {
+    global $DB;
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
+    $table = 'ipal_devices';
+    if ($dbman->table_exists($table)) {
+        $mobiletype = 3;// 3 is the integer that I have assigned to android devices.
+        $message = "refresh";
+        $title = "Notice";
+        $pathtofcm = 'https://fcm.googleapis.com/fcm/send';
+        $serverkey = 'AAAANKCV1q4:APA91bEHOj63SE8SSAxbXbriMn8iNX9AqWtlXBk6aDNGL15NHvnjZ1o7L';
+        $serverkey .= '-ZVRx2jX6bN_gHOhjU5uo7t819VfFHJs0NV_B0q4SBB4c9inr9o_qGWamjxGVxQuRUiGOaY2NNoQg4roS60';
+        $headers = array(
+            'Authorization: key='.$serverkey,
+            'Content-Type: application/json'
+        );
+        if ($tokens = $DB->get_records('ipal_devices', array('ipal_id' => $ipalid, 'mobile_type' => $mobiletype))) {
+            $message = "refresh";
+            $title = "Notice";
+            $pathtofcm = 'https://fcm.googleapis.com/fcm/send';
+            $serverkey = 'AAAANKCV1q4:APA91bEHOj63SE8SSAxbXbriMn8iNX9AqWtlXBk6aDNGL15NHvnjZ1o7L';
+            $serverkey = '-ZVRx2jX6bN_gHOhjU5uo7t819VfFHJs0NV_B0q4SBB4c9inr9o_qGWamjxGVxQuRUiGOaY2NNoQg4roS60';
+            $headers = array(
+                'Authorization: key='.$serverkey,
+                'Content-Type: application/json'
+            );
+            foreach ($tokens as $ipaldevice) {
+                $token = $ipaldevice->token;
+                $fields = array(
+                    'to' => $token,
+                    'notification' => array('title' => $title, 'body' => $message)
+                );
+                $payload = json_encode($fields);
+                // Initializing curl to open a connection.
+                $ch = curl_init();
+
+                // Setting the curl url.
+                curl_setopt($ch, CURLOPT_URL, $pathtofcm);
+
+                // Setting the method as post.
+                curl_setopt($ch, CURLOPT_POST, true);
+
+                // Adding headers.
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                // Disabling ssl support.
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+                // Adding the fields in json format.
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                echo "\n<br />";
+                // Finally executing the curl request.
+                $result = curl_exec($ch);
+                if ($result === false) {
+                    echo "\n<br />debug1221 in ipal/locallib.php refresh_firebase and result is false";
+                    die('Curl failed: ' . curl_error($ch));
+                }
+                // Now close the connection.
+                curl_close($ch);
+
+            }
+
+        }
+
     }
 }

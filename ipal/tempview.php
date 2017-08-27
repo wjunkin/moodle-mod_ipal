@@ -21,7 +21,7 @@
  * This script checks to verify that the passcode is correct for some ipal instance for which responses
  * from mobile devices has been allowed by the teacher. If the passcode is correct and responses from mobile devices
  * is allowed, this program then determines the course and verifies that the user name is correct for someone
- * registered in the course. The verification that the password is correct for that user name is 
+ * registered in the course. The verification that the password is correct for that user name is
  * done by the IPAL App so that the password is not saved on the mobile device. Thus, this page veifies
  * that the pass code is correct for an ipal instance and that the user name is correct for someone
  * in the course where the ipal instance is located, but this page does not require the usual Moodle
@@ -38,7 +38,7 @@ require_once('./locallib.php');
 
 $username = optional_param('user', '', PARAM_RAW_TRIMMED);
 $passcode = optional_param('p', 0, PARAM_INT);
-$regid = optional_param('r', '', PARAM_ALPHANUMEXT);
+$regid = optional_param('r', '', PARAM_RAW);
 $unreg = optional_param('unreg', 0, PARAM_INT);
 
 $qtypemessage = '';
@@ -95,10 +95,13 @@ if (!$setipal && !$setuser) {
     echo "<p id=\"questiontype\">".$qtypemessage."<p>";
 } else {
     // If providing a right username, right passcode, add the registration ID to the ipal_mobile table.
-    if ($regid) {
-        add_regid($regid, $username);
-    }
     $ipalid = $ipal->id;
-    ipal_tempview_display_question($userid, $passcode, $username, $ipalid);
+    if ($regid) {
+        add_regid($regid, $username, $ipalid);
+    }
+    if (!isset($ipalsesskey)) {
+        $ipalsesskey = '';
+    }
+    ipal_tempview_display_question($userid, $passcode, $username, $ipalid, $ipalsesskey);
 }
 echo "</body>\n</html>";
