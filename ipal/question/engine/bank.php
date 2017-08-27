@@ -153,6 +153,7 @@ abstract class ipal_question_bank {
             } catch (coding_exception $e) {
                 // Catching coding_exceptions here means that incompatible
                 // question types do not cause the rest of Moodle to break.
+                $incompatibleqtype = $plugin;
             }
         }
         return $qtypes;

@@ -23,6 +23,7 @@
  */
 
  // You need mod/quiz:manage in addition to question capabilities to access this page.
+defined('MOODLE_INTERNAL') || die();
 require_capability('mod/quiz:manage', $contexts->lowest());
 
 if (!isset($plugin->version)) {

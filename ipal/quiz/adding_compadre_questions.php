@@ -21,6 +21,7 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 require_capability('mod/quiz:manage', $contexts->lowest());
 $compadreurl = 'http://www.compadre.org/ipal/';
 $xmlurl = required_param('xmlurl', PARAM_URL);
