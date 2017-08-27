@@ -1,4 +1,23 @@
 This files describes changes in the ipal code.
+=== Moodle 3.3, IPAL release 2.2.0, version 2017081200 and following.
+* Changes in the code to implement the use of Firebase Cloud Messaging instead of GCM for Android apps.
+    Firebase refreshes the students' screen (in the Android App) every time the teacher sends a question or stops polling.
+         This required changing code in tempview.php and locallib.php.
+         The refresh is only sent to students running the new Android App and successfully logged in to the IPAL instance.
+    Added a database table, ipal_devices, to record the tokens received from Android devices running the new Android IPAL App.
+        This database records the user_id, ipal_id, mobile_type, token, time_created, and time_modified.
+        The first time a user logs in successfully with an ipal instance from an Android device, this entry is created.
+        After that, the entry is updated (user_id stays the same) as the user logs in subsequently.
+        The token is the string supplied by Firebase to the App and only changes if the App is upgraded or has data cleared.
+        Thus one user always is associated with only one token and only one ipal instance.
+    Added a script, ipallogin.php, so that the user logs in directly to the ipal code. 
+        This uses the Moodle authenticate_user_login function.
+        This creates an ipalsesskey from a hash of the user password. 
+        This is used during transactions to verify that the user has logged in.
+    Support for polling using the ejs module has been temporarily removed.
+
+=== Moodle 3.0 to 3.2
+* No significant changes in the code. 
 
 === 2.9 (but keeping the program running in Moodle 2.8 and 2.7) ===
 
@@ -9,7 +28,8 @@ This files describes changes in the ipal code.
     if (class_exists('mod_quiz\question\bank\custom_view')) {
 * Take care of the deprecation on the function add_intro_editor() through line 85 in /mod/ipal/mod_form
     if (method_exists($this, 'standard_intro_elements')) {
-* Made the question stamp for the generic questions unique by creating each stamp individually in /mod/ipal/quiz/ipal_genericq_create.php
+* Made the question stamp for the generic questions unique by creating each stamp individually 
+    in /mod/ipal/quiz/ipal_genericq_create.php
 * Create the utility to use ipal to eaisy take attendance in the Moodle attendance module.
     (Thanks to the Moodle team at the University of Jerusalem for help with the design of this utility.)
     Ipal now looks to see if the attendance module has been added to the Moodle site.

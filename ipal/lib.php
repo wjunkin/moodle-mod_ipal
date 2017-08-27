@@ -194,7 +194,8 @@ function ipal_transfer_archive() {
         foreach ($drecords as $record) {
             $myid = $record->id;
             $qversion = $DB->get_record('question', array('id' => $record->question_id));
-            if (preg_match("/compadre\.org/", $qversion->version)) {//This question came from compadre.org. Transfer it.
+            if (preg_match("/compadre\.org/", $qversion->version)) {
+                // This question came from compadre.org. Transfer it.
                 $compadreids[] = $myid;
                 $question .= "<question>\n";
                 $question .= "<version>".$qversion->version."</version>\n";

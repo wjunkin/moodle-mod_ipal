@@ -56,7 +56,7 @@ if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
  */
 /**
  * Find out who has answered questions so far.
- * 
+ *
  * @param int $ipalid This id for the ipal instance.
  */
 function ipal_who_sofar_count($ipalid) {

@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once('../../config.php');
+
 /**
  * Function to add a question to ipal to take attendance in the attendance module.
  *
@@ -29,8 +31,6 @@
  * @param int $courseid The id of the course where attendance is being taken.
  * @return int The id of the question that was added.
  */
-require_once('../../config.php');
-
 function add_attendancequestion($attendsessionid, $courseid) {
     global $DB;
     global $USER;

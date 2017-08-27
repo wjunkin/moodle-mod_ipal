@@ -68,7 +68,6 @@ $PAGE->set_heading($course->shortname);
 
 // Output starts here.
 echo $OUTPUT->header();
-
 ipal_print_anonymous_message($ipal);
 if (has_capability('mod/ipal:instructoraccess', $context)) {
     ipal_display_instructor_interface($cm->id, $ipal->id);

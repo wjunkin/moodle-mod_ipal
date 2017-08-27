@@ -19,7 +19,7 @@
  * Page to display student answers to IPAL questions
  *
  * @package    mod_ipal
- * @copyright 2011 W. F. Junkin, Eckerd College (http://www.eckerd.edu) 
+ * @copyright 2011 W. F. Junkin, Eckerd College (http://www.eckerd.edu)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

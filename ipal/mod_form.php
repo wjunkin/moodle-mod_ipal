@@ -84,7 +84,7 @@ class mod_ipal_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields.
         if (method_exists($this, 'standard_intro_elements')) {
             // Introduction.
-            // Use this in Moodle 2.9 or later $this->standard_intro_elements(get_string('introduction', 'ipal'));.
+            // Use the following line in Moodle 2.9 or later.
             $this->standard_intro_elements(get_string('introduction', 'ipal'));
         } else {
             $this->add_intro_editor();
