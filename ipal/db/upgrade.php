@@ -139,6 +139,26 @@ function xmldb_ipal_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2015070200, 'ipal');
     }
 
+    if ($oldversion < 2017081200) {
+        $table = new xmldb_table('ipal_devices');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('user_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('ipal_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('mobile_type', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1');
+            $table->add_field('token', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, ' ');
+            $table->add_field('time_created', XMLDB_TYPE_INTEGER, '11', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('time_modified', XMLDB_TYPE_INTEGER, '11', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+            // Conditionally launch add table ipal_mobile.
+            $dbman->create_table($table);
+        }
+
+        // Ipal savepoint reached.
+        upgrade_mod_savepoint(true, 2017081200, 'ipal');
+    }
+
     // Final return of upgrade result (true, all went good) to Moodle.
     return true;
 }

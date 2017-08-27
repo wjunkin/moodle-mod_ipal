@@ -102,7 +102,21 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="ipal_mobile" COMMENT="Table connecting mobile devices to users and courses" PREVIOUS="ipal_answered_archive" NEXT="ipal_slots">
+    <TABLE NAME="ipal_devices" COMMENT="Table connecting mobile devices using Firebase" PREVIOUS="ipal_answered_archive" NEXT="ipal_mobile">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="user_id"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="ipal_id"/>
+        <FIELD NAME="ipal_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="user_id" NEXT="mobile_type"/>
+        <FIELD NAME="mobile_type" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="ipal_id" NEXT="mobile_type"/>
+        <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="mobile_type" NEXT="time_created"/>
+        <FIELD NAME="time_created" TYPE="int" LENGTH="11" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="token" NEXT="time_modified"/>
+        <FIELD NAME="time_modified" TYPE="int" LENGTH="11" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="time_created"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="ipal_mobile" COMMENT="Table connecting mobile devices to users and courses" PREVIOUS="ipal_devices" NEXT="ipal_slots">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="user_id"/>
         <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="reg_id"/>
