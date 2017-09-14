@@ -21,7 +21,7 @@
  * @copyright  2012 W. F. Junkin, Eckerd College, http://www.eckerd.edu
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 $ipalid = optional_param('id', 0, PARAM_INT);// The id for this IPAL instance.
 $ipal = $DB->get_record('ipal', array('id' => $ipalid));
 $course = $DB->get_record('course', array('id' => $ipal->course), '*', MUST_EXIST);

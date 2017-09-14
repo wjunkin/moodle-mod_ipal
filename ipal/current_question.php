@@ -28,7 +28,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 defined('MOODLE_INTERNAL') || die();
 // This program needs to run very quickly to let students know when the current question has changed.
 // Therefore it does not take time to check on login and

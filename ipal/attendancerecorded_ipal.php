@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 $ipalid = optional_param('ipalid', 0, PARAM_INT); // Course_module ID.
 if (!($ipalid)) {
     echo "You must supply the id value for the IPAL activity.";

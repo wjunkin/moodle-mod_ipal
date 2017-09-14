@@ -41,7 +41,7 @@
  */
 
 
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->dirroot . '/mod/ipal/quiz/ipal_genericq_create.php');// Creates two generic questions for each IPAL activity.
 require_once($CFG->dirroot . '/question/editlib.php');
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');

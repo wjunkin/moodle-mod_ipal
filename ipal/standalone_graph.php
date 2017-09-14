@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
 $ipalid = optional_param('ipalid', 0, PARAM_INT);// The id of this IPAL instance.
 $refresh = optional_param('refresh', false, PARAM_BOOL);

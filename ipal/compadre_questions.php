@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->dirroot . '/mod/ipal/locallib.php');
 require_once($CFG->dirroot . '/mod/ipal/question/engine/lib.php');// This is needed for class 'question_display_options'.
 require_once($CFG->dirroot . '/mod/ipal/question/engine/bank.php');

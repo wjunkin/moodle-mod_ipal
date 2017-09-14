@@ -25,7 +25,7 @@
  * @copyright 2011 Eckerd College
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once('../../config.php');
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once("$CFG->libdir/formslib.php");
 defined('MOODLE_INTERNAL') || die();
 
