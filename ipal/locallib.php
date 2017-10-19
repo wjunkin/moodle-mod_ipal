@@ -965,7 +965,6 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
         echo "\n</fieldset>";
         echo "</form>\n";
     } else {
-        echo "debug981 in locallib<p id=\"questiontype\">nocurrentquestion<p>";
         echo "<form class=\"ipalquestion\" action=\"?p=".$passcode."&user=".$username."\" method=\"post\">\n";
         echo "<INPUT TYPE=hidden NAME=\"ipalsesskey\" value=\"$ipalsesskey\">";
         echo "<fieldset>\n<legend>";
@@ -1226,7 +1225,6 @@ function ipal_refresh_firebase($ipalid) {
                 // Finally executing the curl request.
                 $result = curl_exec($ch);
                 if ($result === false) {
-                    echo "\n<br />debug1221 in ipal/locallib.php refresh_firebase and result is false";
                     die('Curl failed: ' . curl_error($ch));
                 }
                 // Now close the connection.
