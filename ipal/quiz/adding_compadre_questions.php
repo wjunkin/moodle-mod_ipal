@@ -23,7 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 require_capability('mod/quiz:manage', $contexts->lowest());
-$compadreurl = 'http://www.compadre.org/ipal/';
+$compadreurl = 'https://www.compadre.org/iPAL/';
 $xmlurl = required_param('xmlurl', PARAM_URL);
 $compadrexmlurl = $compadreurl.$xmlurl;
 $ch = curl_init();

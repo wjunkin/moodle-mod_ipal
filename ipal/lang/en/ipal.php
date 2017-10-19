@@ -70,7 +70,7 @@ Polling may be used
 * To gauge student understanding and guide the pace of the class.
 * To promote greater verbal classroom discussion.
 
-<a href="http://www.compadre.org/ipal/webdocs/Guide.cfm">more</a>';
+<a href="https://www.compadre.org/iPAL/webdocs/Guide.cfm">more</a>';
 $string['nonanonymousmess'] = '';
 $string['pluginadministration'] = 'ipal administration';
 $string['pluginname'] = 'ipal';

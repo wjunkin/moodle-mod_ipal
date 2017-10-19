@@ -285,7 +285,7 @@ function ipal_post_xml($xml) {
     $streamoptions = array('http' => array('method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded'.
         "\r\n", 'content' => http_build_query($postdata)));
     $context = stream_context_create($streamoptions);
-    $response = file_get_contents("http://www.compadre.org/ipal/data/save.cfm", null, $context);
+    $response = file_get_contents("https://www.compadre.org/iPAL/data/save.cfm", null, $context);
     mtrace("Uploading to Compadre...");
     return($response);
 }
