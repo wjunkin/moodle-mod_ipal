@@ -1145,7 +1145,7 @@ function add_regid($regid, $user, $ipalid) {
             $recordnew->ipal_id = $ipalid;
             $recordnew->time_created = time();
             $recordnew->time_modified = time();
-            $recordnew->mobile_type = "android";
+            $recordnew->mobile_type = 3;
             $DB->insert_record('ipal_devices', $recordnew);
             return true;
         }
