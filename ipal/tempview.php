@@ -91,7 +91,7 @@ if ($setipal) {
 echo "<html>\n<head>\n<title>IPAL: ". $ipal->name."</title>\n</head>\n";
 echo "<body>\n";
 
-if (!$setipal && !$setuser) {
+if (!$setipal || !$setuser) {
     echo "<p id=\"questiontype\">".$qtypemessage."<p>";
 } else {
     // If providing a right username, right passcode, add the registration ID to the ipal_mobile table.
