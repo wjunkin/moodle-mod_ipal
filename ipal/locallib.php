@@ -1179,19 +1179,12 @@ function ipal_refresh_firebase($ipalid) {
         $mobiletype = 3;// 3 is the integer that I have assigned to android devices.
         $message = "refresh";
         $title = "Notice";
-        $pathtofcm = 'https://fcm.googleapis.com/fcm/send';
-        $serverkey = 'AAAANKCV1q4:APA91bEHOj63SE8SSAxbXbriMn8iNX9AqWtlXBk6aDNGL15NHvnjZ1o7L';
-        $serverkey .= '-ZVRx2jX6bN_gHOhjU5uo7t819VfFHJs0NV_B0q4SBB4c9inr9o_qGWamjxGVxQuRUiGOaY2NNoQg4roS60';
-        $headers = array(
-            'Authorization: key='.$serverkey,
-            'Content-Type: application/json'
-        );
         if ($tokens = $DB->get_records('ipal_devices', array('ipal_id' => $ipalid, 'mobile_type' => $mobiletype))) {
             $message = "refresh";
             $title = "Notice";
             $pathtofcm = 'https://fcm.googleapis.com/fcm/send';
             $serverkey = 'AAAANKCV1q4:APA91bEHOj63SE8SSAxbXbriMn8iNX9AqWtlXBk6aDNGL15NHvnjZ1o7L';
-            $serverkey = '-ZVRx2jX6bN_gHOhjU5uo7t819VfFHJs0NV_B0q4SBB4c9inr9o_qGWamjxGVxQuRUiGOaY2NNoQg4roS60';
+            $serverkey .= '-ZVRx2jX6bN_gHOhjU5uo7t819VfFHJs0NV_B0q4SBB4c9inr9o_qGWamjxGVxQuRUiGOaY2NNoQg4roS60';
             $headers = array(
                 'Authorization: key='.$serverkey,
                 'Content-Type: application/json'
