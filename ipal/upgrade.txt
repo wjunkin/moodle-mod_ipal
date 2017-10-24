@@ -1,4 +1,6 @@
 This files describes changes in the ipal code.
+=== Moodle 3.3, IPAL release = 2.2.1, version 2017101900
+* Changes in the code to support the change from http to https at the www.compadre.org site.
 === Moodle 3.3, IPAL release 2.2.0, version 2017081200 and following.
 * Changes in the code to implement the use of Firebase Cloud Messaging instead of GCM for Android apps.
     Firebase refreshes the students' screen (in the Android App) every time the teacher sends a question or stops polling.
