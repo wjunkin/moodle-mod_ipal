@@ -965,6 +965,7 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
         echo "\n</fieldset>";
         echo "</form>\n";
     } else {
+        echo "<p id=\"questiontype\">nocurrentquestion<p>";
         echo "<form class=\"ipalquestion\" action=\"?p=".$passcode."&user=".$username."\" method=\"post\">\n";
         echo "<INPUT TYPE=hidden NAME=\"ipalsesskey\" value=\"$ipalsesskey\">";
         echo "<fieldset>\n<legend>";
