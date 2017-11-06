@@ -158,7 +158,7 @@ function ipal_count_question_codes($questioncode) {
 </head>
 <body>
 <?php
-echo "Total Responses --> ".ipal_count_thistime_responses()."/".ipal_who_sofar_count($ipalid);
+echo "Total Responses --> ".ipal_who_thistime($ipalid)."/".ipal_who_sofar_count($ipalid);
 
 /**
  * A function to optain the question type of a given question.

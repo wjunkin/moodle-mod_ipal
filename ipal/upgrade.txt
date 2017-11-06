@@ -1,4 +1,6 @@
 This files describes changes in the ipal code.
+=== Moodle 3.3, IPAL release = 2.2.2 (Build: 2017110600)
+* Changes in code to support multichoice with more than one answer, i.e. checkboxes in questions.
 === Moodle 3.3, IPAL release = 2.2.1, version 2017101900
 * Changes in the code to support the change from http to https at the www.compadre.org site.
 === Moodle 3.3, IPAL release 2.2.0, version 2017081200 and following.
