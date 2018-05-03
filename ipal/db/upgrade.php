@@ -159,6 +159,25 @@ function xmldb_ipal_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2017081200, 'ipal');
     }
 
+    if ($oldversion < 2018050100) {
+        $table = new xmldb_table('quiz_active_questions');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('course', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('ipal_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('quiz_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('question_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_field('time_modified', XMLDB_TYPE_INTEGER, '11', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+            // Conditionally launch add table quiz_active_questions.
+            $dbman->create_table($table);
+        }
+
+        // Ipal savepoint reached.
+        upgrade_mod_savepoint(true, 2018050100, 'ipal');
+    }
+
     // Final return of upgrade result (true, all went good) to Moodle.
     return true;
 }
