@@ -174,6 +174,15 @@ function xmldb_ipal_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
+        // Define field quizid to be added to ipal.
+        $table = new xmldb_table('ipal');
+        $field = new xmldb_field('quizid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0, 'mobile');
+
+        // Conditionally launch add field quizid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Ipal savepoint reached.
         upgrade_mod_savepoint(true, 2018050100, 'ipal');
     }

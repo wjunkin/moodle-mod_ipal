@@ -10,8 +10,9 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="course" NEXT="anonymous"/>
         <FIELD NAME="anonymous" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="name" NEXT="mobile"/>
-        <FIELD NAME="mobile" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="anonymous" NEXT="intro"/>
-        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="mobile" NEXT="introformat"/>
+        <FIELD NAME="mobile" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="anonymous" NEXT="quizid"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="mobile" NEXT="intro"/>
+        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="quizid" NEXT="introformat"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" NEXT="timeopen"/>
         <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat" NEXT="timeclose"/>
         <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeopen" NEXT="preferredbehaviour"/>
