@@ -82,9 +82,10 @@ function moodlexmlquiz2array($xml) {
         if ($label[$level] == 'text') {
             $label[$level] = $label[$level - 1];
         }
-        $qdata[$n]->$label[$level] = trim((string) $elem[$level]);
+        $labellevel $label[$level];
+        $qdata[$n]->$labellevel = trim((string) $elem[$level]);
         if ($debug) {
-            echo "\n<br />at 104 qdata[$n][".$label[$level]."] = ".$qdata[$n]->$label[$level];
+            echo "\n<br />at 104 qdata[$n][".$labellevel."] = ".$qdata[$n]->$labellevel;
         }
         $numchildren[$level] = count($elem[$level]);
         foreach ($elem[$level]->attributes() as $key => $value) {
@@ -92,7 +93,7 @@ function moodlexmlquiz2array($xml) {
                 $key = 'qtype';
             }
             if ($key == 'format') {
-                $key = $label[$level].'format';
+                $key = $labellevel.'format';
                 if ($value == 'html') {
                     $value = 0;
                 } else {
@@ -116,18 +117,21 @@ function moodlexmlquiz2array($xml) {
                     echo "\n<br />This is level 2";
                 }// Level 2.
                 $label[$level] = $elem[$level]->getName();
+                $labellevel = strval($label[$level]);
                 if ($label[$level] == 'text') {
                     $label[$level]  = $label[$level - 1];
+                    $labellevel = strval($label[$level]);
                 }// Text labels take their labels from one level up.
 
+                $labellevel = strval($label[$level]);
                 if ($label[$level] == 'answer') {
                     $na++;// The first answer has na=1.
                     $adata[$n][$na] = new stdClass();
-                    $adata[$n][$na]->$label[$level] = trim((string) $elem[$level]);
+                    $adata[$n][$na]->$labellevel = trim((string) $elem[$level]);
                 } else {
-                    $qdata[$n]->$label[$level] = trim((string) $elem[$level]);
+                    $qdata[$n]->$labellevel = trim((string) $elem[$level]);
                     if ($debug) {
-                        echo "\n<br />at 133 qdata[$n][".$label[$level]."] = ".$qdata[$n]->$label[$level];
+                        echo "\n<br />at 133 qdata[$n][".$labellevel."] = ".$qdata[$n]->$labellevel;
                     }
                 }
                 $numchildren[$level] = count($elem[$level]);
@@ -164,12 +168,13 @@ function moodlexmlquiz2array($xml) {
                             $label[$level]  = $label[$level - 1];
                         }// Text labels take their labels from one level up.
 
+                        $labellevel = strval($label[$level]);
                         if ($label[2] == 'answer') {
-                            $adata[$n][$na]->$label[$level] = trim((string) $elem[$level]);
+                            $adata[$n][$na]->$labellevel = trim((string) $elem[$level]);
                         } else {
-                            $qdata[$n]->$label[$level] = trim((string) $elem[$level]);
+                            $qdata[$n]->$labellevel = trim((string) $elem[$level]);
                             if ($debug) {
-                                echo "\n<br />at 164 qdata[$n][".$label[$level]."] = ".$qdata[$n]->$label[$level];
+                                echo "\n<br />at 164 qdata[$n][".$labellevel."] = ".$qdata[$n]->$labellevel;
                             }
                         }
                         $numchildren[$level] = count($elem[$level]);
@@ -213,12 +218,13 @@ function moodlexmlquiz2array($xml) {
                                     echo $label[1]."->2:".$label[2]."->3:".$label[3]."->4:".$label[4];
                                 }
 
+                                $labellevel = strval($label[$level]);
                                 if ($label[2] == 'answer') {
-                                    $adata[$n][$na]->$label[$level] = trim((string) $elem[$level]);
+                                    $adata[$n][$na]->$labellevel = trim((string) $elem[$level]);
                                 } else {
-                                    $qdata[$n]->$label[$level] = trim((string) $elem[$level]);
+                                    $qdata[$n]->$labellevel = trim((string) $elem[$level]);
                                     if ($debug) {
-                                        echo "\n<br />at 198 qdata[$n][".$label[$level]."] = ".$qdata[$n]->$label[$level];
+                                        echo "\n<br />at 198 qdata[$n][".$labellevel."] = ".$qdata[$n]->$labellevel;
                                     }
                                 }
 
