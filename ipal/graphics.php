@@ -108,7 +108,12 @@ function ipal_count_thistime_responses() {
     global $DB;
     $ipalid = optional_param('ipalid', 0, PARAM_INT);
     $questioncode = ipal_current_question_code($ipalid);
-    $total = $DB->count_records('ipal_answered', array('ipal_code' => $questioncode));
+    $answers = array();
+    $answered = $DB->get_records('ipal_answered', array('ipal_code' => $questioncode));
+    foreach ($answered as $answer) {
+        $answers[$answer->user_id] = 1;
+    }
+    $total = count($answers);
     return((int)$total);
 }
 
