@@ -70,6 +70,15 @@ function ipal_find_student_gridview($userid) {
 $ipal = $DB->get_record('ipal', array('id' => $ipalid));
 $questions = explode(",", $ipal->questions);
 echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"gridviewstyle.css\" />";
+?>
+<style>
+    .tooltip {
+        position: relative;
+        display: inline;
+    }
+</style>
+
+<?php
 echo "<table border=\"1\" width=\"100%\">\n";
 echo "<thead><tr>";
 
@@ -96,20 +105,42 @@ if (isset($users)) {
         }
         foreach ($questions as $question) {
             if (($question != "") and ($question != 0)) {
-                $answer = $DB->get_record('ipal_answered', array('ipal_id' => $ipal->id,
+                $numrecords = $DB->count_records('ipal_answered', array('ipal_id' => $ipal->id,
                     'user_id' => $user, 'question_id' => $question));
-                if (!$answer) {
-                    echo "<td>&nbsp;</td>\n";
+                if ($numrecords == 0) {
+                    $displaydata = '&nbsp';
+                } else if ($numrecords > 1) {
+                    $answers=$DB->get_records('ipal_answered', array('ipal_id' => $ipal->id,
+                        'user_id' => $user, 'question_id' => $question));
+                    $answerdata = array();
+                    $n = 0;
+                    foreach ($answers as $myanswer) {
+                        $ipalanswerid = $myanswer->answer_id;//echo "\n<br />debug108 and ipalanswerid is $ipalanswerid.";
+                        $answer = $DB->get_record('question_answers', array('id' => $ipalanswerid));
+                        $answerdata[$n] = $answer->answer;
+                        $n++;
+                        
+                    }
+                    $displaydata = implode('&&',$answerdata);
                 } else {
+                    $answer = $DB->get_record('ipal_answered', array('ipal_id' => $ipal->id,
+                        'user_id' => $user, 'question_id' => $question));
                     if ($answer->answer_id < 0) {
                         $displaydata = $answer->a_text;
                     } else {
                         $answerdata = $DB->get_record('question_answers', array('id' => $answer->answer_id));
                         $displaydata = $answerdata->answer;
                     }
-                    echo "<td style=\"word-wrap: break-word;\">".substr(trim(strip_tags($displaydata)), 0, 40)."</td>\n";
                 }
-            }
+                $displaydata = trim(strip_tags($displaydata));
+                if (strlen($displaydata) > 40){
+                    //echo "<td title=\"".$displaydata."\" class=\"tooltip\" style=\"word-wrap: break-word;\">".substr(trim(strip_tags($displaydata)), 0, 40)."</td>\n";
+                    echo "<td style=\"word-wrap: break-word;\"><span title=\"".$displaydata."\" class=\"tooltip\">".substr(trim(strip_tags($displaydata)), 0, 40)."</span></td>\n";
+                } else {
+                    echo "<td style=\"word-wrap: break-word;\">".$displaydata."</td>\n";
+                }
+                //echo "<td style=\"word-wrap: break-word;\">".substr(trim(strip_tags($displaydata)), 0, 40)."</td>\n";
+             }
         }
         echo "</tr></tbody>\n";
     }

@@ -31,9 +31,9 @@ defined('MOODLE_INTERNAL') || die();
 if (!isset($plugin)) {
     $plugin = new stdClass;
 }
-$plugin->version  = 2018021500;  // The current module version (Date: YYYYMMDDXX).
+$plugin->version  = 2018092700;  // The current module version (Date: YYYYMMDDXX).
 $plugin->requires = 2014051200;  // Requires this Moodle version.
 $plugin->cron     = 60;           // Period for cron to check this module (secs).
 $plugin->component = 'mod_ipal';      // To check on upgrade, that module sits in correct place.
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '2.2.2 (Build: 2018021500)';
+$plugin->release = '2.2.3 (Build: 2018092700)';
