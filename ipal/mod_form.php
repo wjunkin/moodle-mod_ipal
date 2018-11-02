@@ -29,7 +29,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
-require_once($CFG->dirroot.'/mod/ipal/locallib.php');
 
 /**
  * This class is used to display the form that is used when a new IPAL instance is created.

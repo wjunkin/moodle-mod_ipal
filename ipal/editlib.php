@@ -27,10 +27,9 @@
  * @copyright 2014 Eckerd College
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/formslib.php");
 require_once($CFG->dirroot . '/mod/ipal/locallib.php');
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Clean the question layout from various possible anomalies:

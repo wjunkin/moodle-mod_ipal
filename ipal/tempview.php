@@ -65,6 +65,7 @@ if ($i) {
     $qtypemessage = 'invalidpasscode';
     $setipal = false;
 }
+require_login($course, true, $cm);
 
 if ($setipal) {
     $context = context_course::instance($course->id);

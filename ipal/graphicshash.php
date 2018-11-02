@@ -26,6 +26,11 @@
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
 defined('MOODLE_INTERNAL') || die();
+$ipalid = optional_param('ipalid', 0, PARAM_INT);
+$ipal = $DB->get_record('ipal', array('id' => $ipalid));
+$course = $DB->get_record('course', array('id' => $ipal->course));
+$cm = get_coursemodule_from_instance('ipal', $ipalid, $course->id, false, MUST_EXIST);
+require_login($course, true, $cm);
 
 /**
  * Return the id for the current question
@@ -94,7 +99,6 @@ function ipal_count_questions($questionid, $ipalid) {
 
 }
 
-$ipalid = optional_param('ipalid', 0, PARAM_INT);
 if ($questionid = ipal_show_current_question_id($ipalid)) {
     echo md5("graph.php".ipal_count_questions($questionid, $ipalid));
 }

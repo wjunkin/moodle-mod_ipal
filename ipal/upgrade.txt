@@ -1,4 +1,10 @@
 This files describes changes in the ipal code.
+=== Moodle 3.5, IPAL release = 2.2.4 (Build; 2018110100)
+* Add privacy statement.
+* Remove sending results to compadre.
+=== Moodle 3.3-3.4, IPAL release = 2.2.3, (Build: 2018092700)
+* Changes in the code to support multichoice questions that have more than one answer (checkboxes).
+    This type of question also works with the Android App.
 === Moodle 3.3, IPAL release = 2.2.1, version 2017101900
 * Changes in the code to support the change from http to https at the www.compadre.org site.
 === Moodle 3.3, IPAL release 2.2.0, version 2017081200 and following.

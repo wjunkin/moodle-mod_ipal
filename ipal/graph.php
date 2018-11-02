@@ -24,6 +24,8 @@
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once($CFG->dirroot.'/lib/graphlib.php');
 defined('MOODLE_INTERNAL') || die();
+// No login verification since script produces image based on URL and doesn't access other information.
+
 $labels = optional_param_array('x', '', PARAM_TEXT);
 $data = optional_param('data', '', PARAM_TAGLIST);
 $total = optional_param('total', '', PARAM_INT);

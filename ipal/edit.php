@@ -75,6 +75,7 @@ $PAGE->set_url($thispageurl);
 
 // Get the course object and related bits.
 $course = $DB->get_record('course', array('id' => $quiz->course));
+require_login($course, true, $cm);
 if (!$course) {
     print_error('invalidcourseid', 'error');
 }

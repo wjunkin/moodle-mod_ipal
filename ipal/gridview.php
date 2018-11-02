@@ -110,18 +110,17 @@ if (isset($users)) {
                 if ($numrecords == 0) {
                     $displaydata = '&nbsp';
                 } else if ($numrecords > 1) {
-                    $answers=$DB->get_records('ipal_answered', array('ipal_id' => $ipal->id,
+                    $answers = $DB->get_records('ipal_answered', array('ipal_id' => $ipal->id,
                         'user_id' => $user, 'question_id' => $question));
                     $answerdata = array();
                     $n = 0;
                     foreach ($answers as $myanswer) {
-                        $ipalanswerid = $myanswer->answer_id;//echo "\n<br />debug108 and ipalanswerid is $ipalanswerid.";
+                        $ipalanswerid = $myanswer->answer_id;
                         $answer = $DB->get_record('question_answers', array('id' => $ipalanswerid));
                         $answerdata[$n] = $answer->answer;
                         $n++;
-                        
                     }
-                    $displaydata = implode('&&',$answerdata);
+                    $displaydata = implode('&&', $answerdata);
                 } else {
                     $answer = $DB->get_record('ipal_answered', array('ipal_id' => $ipal->id,
                         'user_id' => $user, 'question_id' => $question));
@@ -133,14 +132,13 @@ if (isset($users)) {
                     }
                 }
                 $displaydata = trim(strip_tags($displaydata));
-                if (strlen($displaydata) > 40){
-                    //echo "<td title=\"".$displaydata."\" class=\"tooltip\" style=\"word-wrap: break-word;\">".substr(trim(strip_tags($displaydata)), 0, 40)."</td>\n";
-                    echo "<td style=\"word-wrap: break-word;\"><span title=\"".$displaydata."\" class=\"tooltip\">".substr(trim(strip_tags($displaydata)), 0, 40)."</span></td>\n";
+                if (strlen($displaydata) > 40) {
+                    echo "<td style=\"word-wrap: break-word;\"><span title=\"".$displaydata."\" class=\"tooltip\">";
+                    echo substr(trim(strip_tags($displaydata)), 0, 40)."</span></td>\n";
                 } else {
                     echo "<td style=\"word-wrap: break-word;\">".$displaydata."</td>\n";
                 }
-                //echo "<td style=\"word-wrap: break-word;\">".substr(trim(strip_tags($displaydata)), 0, 40)."</td>\n";
-             }
+            }
         }
         echo "</tr></tbody>\n";
     }

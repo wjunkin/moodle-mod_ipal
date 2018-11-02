@@ -25,9 +25,9 @@
  * @copyright 2011 Eckerd College
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once("$CFG->libdir/formslib.php");
+
 defined('MOODLE_INTERNAL') || die();
+require_once("$CFG->libdir/formslib.php");
 
 /**
  * Get Answers For a particular question id.
@@ -695,12 +695,13 @@ function ipal_make_student_form($ipal) {
         if ($myqtype == 'essay') {
             echo  "<INPUT TYPE=\"text\" NAME=\"a_text\" size=80>\n<br />";
             echo  "<INPUT TYPE=hidden NAME=\"answer_id\" value=\"-1\">";
-        } else if (($myqtype == 'multichoice') && ($DB->get_record('qtype_multichoice_options', array('questionid' => $qid, 'single' => 0)))) {
+        } else if (($myqtype == 'multichoice') &&
+            ($DB->get_record('qtype_multichoice_options', array('questionid' => $qid, 'single' => 0)))) {
             foreach ($myformarray[0]['answers'] as $k => $v) {
                 echo "<input type=\"checkbox\" name=\"answers_id[]\" value=\"$k\" ".$disabled."/> ".strip_tags($v)."<br />\n";
             }
             echo "<INPUT TYPE=hidden NAME=a_text VALUE=\" \">";
-            echo "<INPUT TYPE=hidden NAME=answer_id VALUE=\"-2\">";            
+            echo "<INPUT TYPE=hidden NAME=answer_id VALUE=\"-2\">";
         } else {
             foreach ($myformarray[0]['answers'] as $k => $v) {
                 echo "<input type=\"radio\" name=\"answer_id\" value=\"$k\" ".$disabled."/> ".strip_tags($v)."<br />\n";
@@ -763,11 +764,11 @@ function findinstructor($cnum) {
 /**
  * This is the code to insert the student array responses into the database.
  * @param int $questionid The question id.
- * @param array $answers_id The array of the integer answers the student subnitted.
+ * @param array $myanswersid The array of the integer answers the student subnitted.
  * @param int $activequestionid The id of the active question. Same as question id unless question has been changed.
  * @param int $instructor The id of the teacher.
  */
-function ipal_save_array_responses($questionid, $answers_id, $activequestionid, $instructor) {
+function ipal_save_array_responses($questionid, $myanswersid, $activequestionid, $instructor) {
     global $DB;
     global $CFG;
     global $USER;
@@ -788,7 +789,6 @@ function ipal_save_array_responses($questionid, $answers_id, $activequestionid, 
     $recordarc->user_id = $USER->id;
     $recordarc->question_id = $questionid;
     $recordarc->quiz_id = $ipalid;
-    //$recordarc->answer_id = $answerid;
     $recordarc->a_text = $atext;
     $recordarc->class_id = $course->id;
     $recordarc->ipal_id = $ipalid;
@@ -804,7 +804,6 @@ function ipal_save_array_responses($questionid, $answers_id, $activequestionid, 
     $record->user_id = $USER->id;
     $record->question_id = $questionid;
     $record->quiz_id = $ipalid;
-    //$record->answer_id = $answerid;
     $record->a_text = $atext;
     $record->class_id = $course->id;
     $record->ipal_id = $ipalid;
@@ -815,7 +814,7 @@ function ipal_save_array_responses($questionid, $answers_id, $activequestionid, 
         $mybool = $DB->delete_records('ipal_answered', array('user_id' => $USER->id,
             'question_id' => $questionid, 'ipal_id' => $ipalid ));
     }
-    foreach ($answers_id as $key => $value) {
+    foreach ($myanswersid as $key => $value) {
         $recordarc->answer_id = $value;
         $record->answer_id = $value;
         $lastinsertid = $DB->insert_record('ipal_answered_archive', $recordarc);
@@ -894,7 +893,7 @@ function ipal_display_student_interface($ipalid) {
     $ipal = $DB->get_record('ipal', array('id' => $ipalid));
     $answerid = optional_param('answer_id', 0, PARAM_INT);
     $atext = optional_param('a_text', '', PARAM_RAW_TRIMMED);
-    $answers_id = optional_param_array('answers_id', NULL, PARAM_INT);
+    $myanswersid = optional_param_array('answers_id', null, PARAM_INT);
     $questionid = optional_param('question_id', 0, PARAM_INT);
     $activequestionid = optional_param('active_question_id', 0, PARAM_INT);
     $instructor = optional_param('instructor', 0, PARAM_ALPHANUM);
@@ -905,19 +904,15 @@ function ipal_display_student_interface($ipalid) {
     if (isset($answerid) and ($answerid <> 0)) {
         if ($answerid == '-2') {
             // The answer is an array that comes from a multichoice question with several possible asnwers in an array.
-            if(count($answers_id) > 0) {
-                //$questionname = array();
-                //$n=0;
-                foreach ($answers_id as $key => $value) {
+            if (count($myanswersid) > 0) {
+                foreach ($myanswersid as $key => $value) {
                     if ($questiondata = $DB->get_record('question_answers', array('id' => $value))) {
                         $questionanswer[] = strip_tags($questiondata->answer);
-                        //$n++;
                     }
                 }
-                $priorresponse = "\n<br />Last answers you submitted were :".implode(", ",$questionanswer);
-                ipal_save_array_responses($questionid, $answers_id, $activequestionid, $instructor);
+                $priorresponse = "\n<br />Last answers you submitted were :".implode(", ", $questionanswer);
+                ipal_save_array_responses($questionid, $myanswersid, $activequestionid, $instructor);
             }
-            
         } else {
             if ($answerid == '-1') {
                 $priorresponse = "\n<br />Last answer you submitted: ".strip_tags($atext);
@@ -984,7 +979,7 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
 
     $answerid = optional_param('answer_id', 0, PARAM_INT);
     $atext = optional_param('a_text', '', PARAM_RAW_TRIMMED);
-    $answers_id = optional_param_array('answers_id', NULL, PARAM_INT);
+    $myanswersid = optional_param_array('answers_id', null, PARAM_INT);
     $questionid = optional_param('question_id', 0, PARAM_INT);
     $activequestionid = optional_param('active_question_id', 0, PARAM_INT);
     $instructor = optional_param('instructor', 0, PARAM_ALPHANUM);
@@ -994,19 +989,15 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
     if ($answerid <> 0) {
         if ($answerid == '-2') {
             // The answer is an array that comes from a multichoice question with several possible asnwers in an array.
-            if(count($answers_id) > 0) {
-                //$questionname = array();
-                //$n=0;
-                foreach ($answers_id as $key => $value) {
+            if (count($myanswersid) > 0) {
+                foreach ($myanswersid as $key => $value) {
                     if ($questiondata = $DB->get_record('question_answers', array('id' => $value))) {
                         $questionanswer[] = strip_tags($questiondata->answer);
-                        //$n++;
                     }
                 }
-                $priorresponse = "\n<br />Last answers you submitted were :".implode(", ",$questionanswer);
-                ipal_save_array_responses($questionid, $answers_id, $activequestionid, $instructor);
+                $priorresponse = "\n<br />Last answers you submitted were :".implode(", ", $questionanswer);
+                ipal_save_array_responses($questionid, $myanswersid, $activequestionid, $instructor);
             }
-            
         } else {
             if ($answerid == '-1') {
                 $priorresponse = "\n<br />Last answer you submitted: ".strip_tags($atext);
@@ -1041,7 +1032,7 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
         echo "</legend>\n";
         $myqtype = ipal_get_qtype($questionid);
         if ($myqtype == 'multichoice') {
-            if ($DB->get_record('qtype_multichoice_options', array('questionid' => $questionid, 'single' => 0))){
+            if ($DB->get_record('qtype_multichoice_options', array('questionid' => $questionid, 'single' => 0))) {
                 echo "<p id=\"questiontype\">checkbox<p>";
             } else {
                 echo "<p id=\"questiontype\">multichoice<p>";
@@ -1056,7 +1047,8 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
         if ($myqtype == 'essay') {
             echo  "<INPUT TYPE=\"text\" NAME=\"a_text\" size=80>\n<br />";
             echo  "<INPUT TYPE=hidden NAME=\"answer_id\" value=\"-1\">";
-        } else if (($myqtype == 'multichoice') && ($DB->get_record('qtype_multichoice_options', array('questionid' => $questionid, 'single' => 0)))) {
+        } else if (($myqtype == 'multichoice') &&
+            ($DB->get_record('qtype_multichoice_options', array('questionid' => $questionid, 'single' => 0)))) {
             $countid = 0;
             foreach ($myformarray[0]['answers'] as $k => $v) {
                 echo "<span>";
@@ -1067,7 +1059,7 @@ function ipal_tempview_display_question($userid, $passcode, $username, $ipalid, 
                 $countid++;
             }
             echo "<INPUT TYPE=hidden NAME=a_text VALUE=\" \">";
-            echo "<INPUT TYPE=hidden NAME=answer_id VALUE=\"-2\">";            
+            echo "<INPUT TYPE=hidden NAME=answer_id VALUE=\"-2\">";
         } else {// Display choices if multiple-choice question.
             $countid = 0;
             foreach ($myformarray[0]['answers'] as $key => $value) {
@@ -1253,7 +1245,7 @@ function ipal_send_message_to_device($course) {
  * Add or Update (if existed) the regID that is associated with a userid
  *
  * @param string $regid The token associated with the users mobile device.
- * @param string $user The username of the user.
+ * @param string $username The username of the user.
  * @param int $ipalid The id for the ipal instance.
  */
 function add_regid($regid, $username, $ipalid) {
