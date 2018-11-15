@@ -82,7 +82,7 @@ function moodlexmlquiz2array($xml) {
         if ($label[$level] == 'text') {
             $label[$level] = $label[$level - 1];
         }
-        $labellevel $label[$level];
+        $labellevel = $label[$level];
         $qdata[$n]->$labellevel = trim((string) $elem[$level]);
         if ($debug) {
             echo "\n<br />at 104 qdata[$n][".$labellevel."] = ".$qdata[$n]->$labellevel;
