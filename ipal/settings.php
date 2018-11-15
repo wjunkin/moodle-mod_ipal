@@ -17,13 +17,15 @@
 /**
  * Use this file to configure the IPAL module
  *
- * This sets the ipal_analytics
- * An analysis of the IPAL student responses may be able to identify at-risk students and assist in early intervention.
- * If this is selected the student polling data, identified only by the Moodle student userID, will be sent to
- * the ComPADRE site so that an analysis of the data can be done.
- * This analysis can only be used by authorized people at your institution to identify the usr names or actual names of any student.
- * and these authorized people can only view the results of the analysis for their own school.
- * If this is not selected, no data is sent to the ComPADRE site.
+ * This sets the settings.
+ * The enable compadre setting allows teachers to get peer reviewed physics questions from the compadre web site.
+ * This site is at https://www.compadre.org/. The default setting is to allow this.
+ * The ipal_auto_create_generic setting, if set, will create two generic questions for every new instance of IPAL activity.
+ * One generic question is a multichoice question with 8 possible choices but no text associated with any choice.
+ * The other generic question is a essay question asking the student to fill in a response.
+ * Obviously, the teacher will have to tell the student what the text of the question is.
+ * However, having both of these questions available can be very handy when a teacher thinks of a question during class,
+ * or doesn't have time to create a question before the class starts.
  *
  * @package    mod_ipal
  * @copyright  2013 Bill Junkin
@@ -31,13 +33,6 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-
-$name = new lang_string('ipal_analytics', 'mod_ipal');
-$description = new lang_string('ipal_analytics_help', 'mod_ipal');
-$settings->add(new admin_setting_configcheckbox('mod_ipal/analytics',
-                                                $name,
-                                                $description,
-                                                1));
 
 $name = new lang_string('ipal_enable_compadre', 'mod_ipal');
 $description = new lang_string('ipal_enable_compadre_help', 'mod_ipal');
