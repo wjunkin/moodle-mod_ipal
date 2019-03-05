@@ -163,7 +163,7 @@ if (isset($users)) {
                         $safeanswer1 = preg_replace("/\n/", "<br />", $displaydata);
                         $tooltiptext[] .= "\n    link".$user."_$question: '$safeanswer1'";
                         $tablerow[$nrow] .= "<td><div class=\"showTip link".$user."_$question\">".substr($displaydata, 0, 40);
-                        $tablerow[$nrow] .= "</div></td>";
+                        $tablerow[$nrow] .= " ....</div></td>";
                 } else {
                     $tablerow[$nrow] .= "<td style=\"word-wrap: break-word;\">".$displaydata."</td>\n";
                 }
