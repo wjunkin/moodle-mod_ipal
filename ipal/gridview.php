@@ -62,14 +62,14 @@ function ipal_who_sofar_gridview($ipalid) {
  * @return string The last name, first name of the student.
  */
 function ipal_find_student_gridview($userid, $namesort) {
-     global $DB;
-     $user = $DB->get_record('user', array('id' => $userid));
-     if ($namesort == 1) {
+    global $DB;
+    $user = $DB->get_record('user', array('id' => $userid));
+    if ($namesort == 1) {
         $name = $user->firstname."__".$user->lastname;
-     } else {
+    } else {
         $name = $user->lastname."__".$user->firstname;
-     }
-     return($name);
+    }
+    return($name);
 }
 
 $ipal = $DB->get_record('ipal', array('id' => $ipalid));
@@ -107,7 +107,7 @@ if (!$ipal->anonymous) {
         echo "<th>".get_string('firstname', 'ipal').' </th><th>'.get_string('lastname', 'ipal')."</th>\n";
     } else {
         echo "<th>".get_string('lastname', 'ipal').' </th><th>'.get_string('firstname', 'ipal')."</th>\n";
-    }        
+    }
 }
 
 foreach ($questions as $question) {
