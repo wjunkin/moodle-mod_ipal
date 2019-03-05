@@ -390,17 +390,55 @@ function ipal_clear_question($ipalid) {
 
 /**
  * Java script for checking to see if the chart need to be updated.
+ * It also has the javascript to make a blinking notice if the time has been too big.
  *
  * @param int $ipalid The id of this ipal instance.
  */
 function ipal_java_graphupdate($ipalid) {
     global $DB;
+    // CSS style for blinking 'Refresh Page!' notice.
+    echo "\n<style>";
+    echo "\n .blinking{";
+    echo "\n    animation:blinkingText 0.8s infinite;";
+    echo "\n}";
+    echo "\n @keyframes blinkingText{";
+    echo "\n    0%{     color: red;    }";
+    echo "\n    50%{    color: transparent; }";
+    echo "\n    100%{   color: red;    }";
+    echo "\n}";
+    echo "\n .blinkhidden{";
+    echo "\n    color: transparent;";
+    echo "\n}";
+    echo "\n</style>";
+
+    // Javascript and css to make a blinking 'Refresh Page' appear when the page stops refreshing responses.
+    echo "\n<script>";
+    echo "\n  function myFunction() {";
+    echo "\n    document.getElementById('blink1').setAttribute(\"class\", \"blinking\");";
+    echo "\n }";
+    echo "\n</script>";
+    // The number of seconds before checking to see if the answers have changed is the $refreshtime.
+    $refreshtime = 10;
+    $sessionconfig = $DB->get_record('config', array('name' => 'sessiontimeout'));
+    $sessiontimeout = $sessionconfig->value;
+    $maxrepeat = intval($sessiontimeout / $refreshtime);
+    // The number of refreshes without a new answer is $numrefresh.
+    $numrefresh = 0;
+    $replacetime = $refreshtime * 1000;
     echo "\n\n<script type=\"text/javascript\">\nvar http = false;\nvar x=\"\";
         \n\nif(navigator.appName == \"Microsoft Internet Explorer\")
         {\nhttp = new ActiveXObject(\"Microsoft.XMLHTTP\");\n} else {\nhttp = new XMLHttpRequest();}";
+    echo "\n var numrefresh = $numrefresh;";
+    echo "\n var maxrepeat = $maxrepeat;";
     echo "\n\nfunction replace() { ";
     $t = '&t='.time();
-    echo "\nvar t=setTimeout(\"replace()\",10000);\nhttp.open(\"GET\", \"graphicshash.php?ipalid=".$ipalid.$t."\", true);";
+    echo "\n numrefresh ++;";
+    echo "\n if(numrefresh < $maxrepeat) {";
+    echo "\nvar t=setTimeout(\"replace()\",$replacetime);";
+    echo "\n } else {";
+    echo "\n myFunction();";
+    echo "\n }";
+    echo "\nhttp.open(\"GET\", \"graphicshash.php?ipalid=".$ipalid.$t."\", true);";
     echo "\nhttp.onreadystatechange=function() {\nif(http.readyState == 4) {\nif(http.responseText != x){";
     echo "\nx=http.responseText;\n";
     $state = $DB->get_record('ipal', array('id' => $ipalid));
@@ -409,9 +447,7 @@ function ipal_java_graphupdate($ipalid) {
     } else {
         echo "document.getElementById('graphIframe').src=\"gridview.php?id=".$ipalid."\"";
     }
-
     echo "}\n}\n}\nhttp.send(null);\n}\nreplace();\n</script>";
-
 }
 
 /**
@@ -540,19 +576,19 @@ function ipal_display_instructor_interface($cmid, $ipalid) {
         $ac = $state->id.substr($timecreated, strlen($timecreated) - 2, 2);
         echo "<td>access code=$ac</td>";
     }
-    echo "</tr></table>";
+    echo "<td><div id=\"blink1\" class=\"blinkhidden\">Refresh Page</div></td></tr></table>";
     // Script to make the preview window a popout.
     echo "\n<script language=\"javascript\" type=\"text/javascript\">
-    \n function ipalpopup(id) {
+        \n function ipalpopup(id) {
         \n\t url = '".$CFG->wwwroot."/question/preview.php?id='+id+'&amp;cmid=";
         echo $cmid;
         echo "&amp;behaviour=deferredfeedback&amp;correctness=0&amp;marks=1&amp;markdp=-2";
         echo "&amp;feedback&amp;generalfeedback&amp;rightanswer&amp;history';";
-        echo "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
+    echo "\n\t newwindow=window.open(url,'Question Preview','height=600,width=800,top=0,left=0,menubar=0,";
         echo "location=0,scrollbars,resizable,toolbar,status,directories=0,fullscreen=0,dependent');";
-        echo "\n\t if (window.focus) {newwindow.focus()}
+    echo "\n\t if (window.focus) {newwindow.focus()}
         \n\t return false;
-    \n }
+        \n }
     \n </script>\n";
 
     echo  ipal_make_instructor_form($ipalid, $cmid);

@@ -69,7 +69,7 @@ class mod_ipal_mod_form extends moodleform_mod {
         $cmid = optional_param('update', 0, PARAM_INT);
         if ($cmid) {
             $cm = $DB->get_record('course_modules', array('id' => $cmid), '*', MUST_EXIST);
-            if (ipal_check_answered($cm->instance)) {
+            if (count($DB->get_records('ipal_answered', array('ipal_id' => $cm->instance)))) {
                 $mform->disabledIf('anonymous', 'name');
             }
         }
@@ -104,4 +104,5 @@ class mod_ipal_mod_form extends moodleform_mod {
         $this->add_action_buttons();
 
     }
+
 }

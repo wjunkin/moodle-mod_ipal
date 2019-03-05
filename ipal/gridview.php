@@ -32,7 +32,8 @@ if (!(has_capability('mod/ipal:instructoraccess', $contextinstance))) {
     echo "\n<br />You must be authorized to access this site";
     exit;
 }
-
+// To sort by first name, namesort =1. Defalut is 0 = sort by last name.
+$namesort = optional_param('namesort', 0, PARAM_INT);
 /**
  * Return the number of users who have submitted answers to this IPAL instance.
  *
@@ -60,31 +61,53 @@ function ipal_who_sofar_gridview($ipalid) {
  * @param int $userid The ID for the student.
  * @return string The last name, first name of the student.
  */
-function ipal_find_student_gridview($userid) {
+function ipal_find_student_gridview($userid, $namesort) {
      global $DB;
      $user = $DB->get_record('user', array('id' => $userid));
-     $name = $user->lastname.", ".$user->firstname;
+     if ($namesort == 1) {
+        $name = $user->firstname."__".$user->lastname;
+     } else {
+        $name = $user->lastname."__".$user->firstname;
+     }
      return($name);
 }
 
 $ipal = $DB->get_record('ipal', array('id' => $ipalid));
 $questions = explode(",", $ipal->questions);
 echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"gridviewstyle.css\" />";
-?>
-<style>
-    .tooltip {
-        position: relative;
-        display: inline;
-    }
-</style>
 
-<?php
+// Javascript and css for tooltips.
+    echo "\n<script type=\"text/javascript\">";
+    require_once("dw_tooltip_c.php");
+    echo "\n</script>";
+
+    echo "\n<style type=\"text/css\">";
+    echo "\ndiv#tipDiv {";
+        echo "\nfont-size:16px; line-height:1.2;";
+        echo "\ncolor:#000; background-color:#E1E5F1;";
+        echo "\nborder:1px solid #667295; padding:4px;";
+        echo "\nwidth:320px;";
+    echo "\n}";
+    echo "\n</style>";
+// The array for storing the all the texts for tootips.
+$tooltiptext = array();
+if (!$ipal->anonymous) {
+    if ($namesort == 1) {
+        echo "<a href='gridview.php?id=$ipalid&namesort=0'>Sort by last name</a>";
+    } else {
+        echo "<a href='gridview.php?id=$ipalid&namesort=1'>Sort by first name</a>";
+    }
+}
 echo "<table border=\"1\" width=\"100%\">\n";
 echo "<thead><tr>";
 
 // If anonymous, exclude the column "name" from the table.
 if (!$ipal->anonymous) {
-    echo "<th>Name</th>\n";
+    if ($namesort == 1) {
+        echo "<th>".get_string('firstname', 'ipal').' </th><th>'.get_string('lastname', 'ipal')."</th>\n";
+    } else {
+        echo "<th>".get_string('lastname', 'ipal').' </th><th>'.get_string('firstname', 'ipal')."</th>\n";
+    }        
 }
 
 foreach ($questions as $question) {
@@ -96,19 +119,23 @@ echo "</tr>\n</thead>\n";
 
 $users = ipal_who_sofar_gridview($ipal->id);
 if (isset($users)) {
+    $tablerow = array();
+    $nrow = 0;
     foreach ($users as $user) {
-        echo "<tbody><tr>";
+        $tablerow[$nrow] = "<tbody><tr>";
 
         // If anonymous, exlude the student name data from the table.
         if (!$ipal->anonymous) {
-            echo "<td>".ipal_find_student_gridview($user)."</td>\n";
+            $fullname = ipal_find_student_gridview($user, $namesort);
+            list($lastname, $firstname) = explode('__', $fullname);
+            $tablerow[$nrow] .= "<td>$lastname </td><td>$firstname</td>\n";
         }
         foreach ($questions as $question) {
             if (($question != "") and ($question != 0)) {
                 $numrecords = $DB->count_records('ipal_answered', array('ipal_id' => $ipal->id,
                     'user_id' => $user, 'question_id' => $question));
                 if ($numrecords == 0) {
-                    $displaydata = '&nbsp';
+                    $displaydata = '';
                 } else if ($numrecords > 1) {
                     $answers = $DB->get_records('ipal_answered', array('ipal_id' => $ipal->id,
                         'user_id' => $user, 'question_id' => $question));
@@ -120,28 +147,44 @@ if (isset($users)) {
                         $answerdata[$n] = $answer->answer;
                         $n++;
                     }
-                    $displaydata = implode('&&', $answerdata);
+                    $displaydata = strip_tags(trim(implode('&&', $answerdata)));
                 } else {
                     $answer = $DB->get_record('ipal_answered', array('ipal_id' => $ipal->id,
                         'user_id' => $user, 'question_id' => $question));
                     if ($answer->answer_id < 0) {
-                        $displaydata = $answer->a_text;
+                        $displaydata = htmlentities(trim($answer->a_text));
                     } else {
                         $answerdata = $DB->get_record('question_answers', array('id' => $answer->answer_id));
                         $displaydata = $answerdata->answer;
                     }
                 }
-                $displaydata = trim(strip_tags($displaydata));
+
                 if (strlen($displaydata) > 40) {
-                    echo "<td style=\"word-wrap: break-word;\"><span title=\"".$displaydata."\" class=\"tooltip\">";
-                    echo substr(trim(strip_tags($displaydata)), 0, 40)."</span></td>\n";
+                        $safeanswer1 = preg_replace("/\n/", "<br />", $displaydata);
+                        $tooltiptext[] .= "\n    link".$user."_$question: '$safeanswer1'";
+                        $tablerow[$nrow] .= "<td><div class=\"showTip link".$user."_$question\">".substr($displaydata, 0, 40);
+                        $tablerow[$nrow] .= "</div></td>";
                 } else {
-                    echo "<td style=\"word-wrap: break-word;\">".$displaydata."</td>\n";
+                    $tablerow[$nrow] .= "<td style=\"word-wrap: break-word;\">".$displaydata."</td>\n";
                 }
             }
         }
-        echo "</tr></tbody>\n";
+        $tablerow[$nrow] .= "</tr></tbody>\n";
+        $nrow ++;
     }
 }
-
+if (count($tablerow) > 0) {
+    sort($tablerow);
+    for ($n = 0; $n < count($tablerow); $n++) {
+        echo $tablerow[$n];
+    }
+}
 echo "</table>\n";
+if (count($tooltiptext) > 0) {
+    $tooltiptexts = implode(",", $tooltiptext);
+    echo "\n<script>";
+    echo "\ndw_Tooltip.content_vars = {";
+    echo $tooltiptexts;
+    echo "\n}";
+    echo "\n</script>";
+}
