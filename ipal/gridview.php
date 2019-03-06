@@ -59,6 +59,7 @@ function ipal_who_sofar_gridview($ipalid) {
  * Return the first and last name of a student.
  *
  * @param int $userid The ID for the student.
+ * @param int $namesort The integer to wort by first name (1) or last name (0).
  * @return string The last name, first name of the student.
  */
 function ipal_find_student_gridview($userid, $namesort) {
